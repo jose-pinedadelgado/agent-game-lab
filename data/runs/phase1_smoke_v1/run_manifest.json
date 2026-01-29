@@ -1,0 +1,112 @@
+{
+  "run_id": "phase1_smoke_v1",
+  "config_hash": "51074de14c96a951",
+  "config_snapshot": {
+    "run": {
+      "run_id": "phase1_smoke_v1",
+      "seed": 1337,
+      "output_dir": "data/runs/phase1_smoke_v1",
+      "store_prompts": true,
+      "store_raw_responses": true
+    },
+    "game": {
+      "name": "prisoners_dilemma",
+      "payoff_matrix": {
+        "C": {
+          "C": [
+            3,
+            3
+          ],
+          "D": [
+            0,
+            5
+          ]
+        },
+        "D": {
+          "C": [
+            5,
+            0
+          ],
+          "D": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    "horizon": {
+      "type": "fixed",
+      "n_rounds": 50,
+      "stop_prob": 0.02
+    },
+    "experiment": {
+      "replicates": 5,
+      "conditions": [
+        {
+          "name": "MockLLM_cooperative_vs_ALLD",
+          "agent_a": {
+            "ref": "agents/llm_default.yaml",
+            "overrides": {
+              "persona": "cooperative"
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "ALLD"
+            }
+          }
+        },
+        {
+          "name": "TFT_vs_ALLD",
+          "agent_a": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "TFT"
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "ALLD"
+            }
+          }
+        },
+        {
+          "name": "TFT_vs_WSLS",
+          "agent_a": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "TFT"
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "WSLS"
+            }
+          }
+        }
+      ]
+    },
+    "metrics": {
+      "collapse": {
+        "k": 10,
+        "cooperation_threshold": 0.2
+      },
+      "report": [
+        "cooperation_rate",
+        "cooperation_rate_over_time",
+        "retaliation_rate",
+        "forgiveness_rate",
+        "exploitability_payoff_gap",
+        "time_to_collapse"
+      ]
+    }
+  },
+  "environment": {
+    "python_version": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "timestamp_utc": "2026-01-27T21:30:28.166555+00:00"
+  }
+}

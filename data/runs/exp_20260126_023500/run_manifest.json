@@ -1,0 +1,82 @@
+{
+  "run_id": "exp_20260126_023500",
+  "config_hash": "0809315592b1ee37",
+  "config_snapshot": {
+    "run": {
+      "run_id": "exp_20260126_023500",
+      "seed": 1769423700,
+      "output_dir": "C:\\Users\\coche\\Documents\\Research_Projects\\5_agentic_cooperation_game_theory\\data\\runs\\exp_20260126_023500",
+      "store_prompts": true,
+      "store_raw_responses": true
+    },
+    "game": {
+      "name": "prisoners_dilemma",
+      "payoff_matrix": {
+        "C": {
+          "C": [
+            3,
+            3
+          ],
+          "D": [
+            0,
+            5
+          ]
+        },
+        "D": {
+          "C": [
+            5,
+            0
+          ],
+          "D": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    "horizon": {
+      "type": "fixed",
+      "n_rounds": 50,
+      "stop_prob": 0.0
+    },
+    "experiment": {
+      "replicates": 3,
+      "conditions": [
+        {
+          "name": "ALLC_vs_ALLD",
+          "agent_a": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "ALLC"
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "ALLD"
+            }
+          }
+        }
+      ]
+    },
+    "metrics": {
+      "collapse": {
+        "k": 10,
+        "cooperation_threshold": 0.2
+      },
+      "report": [
+        "cooperation_rate",
+        "cooperation_rate_over_time",
+        "retaliation_rate",
+        "forgiveness_rate",
+        "exploitability_payoff_gap",
+        "time_to_collapse"
+      ]
+    }
+  },
+  "environment": {
+    "python_version": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "timestamp_utc": "2026-01-26T10:35:00.649345+00:00"
+  }
+}

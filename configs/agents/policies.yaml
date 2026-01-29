@@ -1,0 +1,5 @@
+type: "policy"
+policy: "TFT"
+policy_params:
+  generous_prob: 0.1
+  wsls_win_threshold: 3

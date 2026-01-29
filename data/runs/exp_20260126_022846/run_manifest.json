@@ -1,0 +1,82 @@
+{
+  "run_id": "exp_20260126_022846",
+  "config_hash": "c75d082dae9a22ff",
+  "config_snapshot": {
+    "run": {
+      "run_id": "exp_20260126_022846",
+      "seed": 1769423326,
+      "output_dir": "C:\\Users\\coche\\Documents\\Research_Projects\\5_agentic_cooperation_game_theory\\data\\runs\\exp_20260126_022846",
+      "store_prompts": true,
+      "store_raw_responses": true
+    },
+    "game": {
+      "name": "prisoners_dilemma",
+      "payoff_matrix": {
+        "C": {
+          "C": [
+            3,
+            3
+          ],
+          "D": [
+            0,
+            5
+          ]
+        },
+        "D": {
+          "C": [
+            5,
+            0
+          ],
+          "D": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    "horizon": {
+      "type": "geometric",
+      "n_rounds": 500,
+      "stop_prob": 0.01
+    },
+    "experiment": {
+      "replicates": 20,
+      "conditions": [
+        {
+          "name": "GTFT_vs_ALLD",
+          "agent_a": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "GTFT"
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "ALLD"
+            }
+          }
+        }
+      ]
+    },
+    "metrics": {
+      "collapse": {
+        "k": 10,
+        "cooperation_threshold": 0.2
+      },
+      "report": [
+        "cooperation_rate",
+        "cooperation_rate_over_time",
+        "retaliation_rate",
+        "forgiveness_rate",
+        "exploitability_payoff_gap",
+        "time_to_collapse"
+      ]
+    }
+  },
+  "environment": {
+    "python_version": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "timestamp_utc": "2026-01-26T10:28:46.225741+00:00"
+  }
+}
