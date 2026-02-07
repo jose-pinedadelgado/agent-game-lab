@@ -226,6 +226,8 @@ class StatementParser:
             transactions = self._parse_wells_fargo_pdf(text)
         elif self.bank == 'boa':
             transactions = self._parse_boa_pdf(text)
+        elif self.bank in ('schoolfirst', 'credit_union'):
+            transactions = self._parse_credit_union_pdf(text)
 
         # If bank-specific found enough, use those
         if len(transactions) >= 3:
@@ -519,51 +521,118 @@ class StatementParser:
         """Parse credit union PDF statements (SchoolFirst, etc.)."""
         transactions = []
 
-        # Credit union format: MM/DD Transaction Type Description Amount Balance
-        patterns = [
-            # With transaction type
-            r'(\d{2}/\d{2})\s+(Deposit|Withdrawal|Debit Card|ACH|Transfer)\s+(.+?)\s+([\d,]+\.\d{2})-?\s+[\d,]+\.\d{2}',
-            # Generic format
-            r'(\d{2}/\d{2})\s+(.+?)\s+([\d,]+\.\d{2})-?\s+[\d,]+\.\d{2}',
-        ]
+        # Extract statement year from header like "Date:01/01/25 - 01/31/25"
+        statement_year = datetime.now().year
+        year_match = re.search(r'Date:\s*\d{1,2}/\d{1,2}/(\d{2})\s*-\s*\d{1,2}/\d{1,2}/(\d{2})', text)
+        if year_match:
+            year_str = year_match.group(2)
+            statement_year = 2000 + int(year_str)
+            logger.debug(f"Credit union statement year detected: {statement_year}")
 
-        current_year = datetime.now().year
+        # First pass: extract continuation lines (merchant details for debit cards)
+        # Format: MM/DD CardNumber MCC MERCHANT_NAME CITY STATE ...
+        # Example: 01/17 000027871099275721 5814 EVERYDAY 32566001 IRVINE CA 1100 PERLOTA
+        continuation_map = {}
+        continuation_pattern = r'^(\d{2}/\d{2})\s+(\d{12,})\s+(\d{4})\s+(.+)$'
+        for match in re.finditer(continuation_pattern, text, re.MULTILINE):
+            cont_date_str = match.group(1)
+            merchant_info = match.group(4).strip()
 
-        for pattern in patterns:
-            for match in re.finditer(pattern, text, re.MULTILINE):
+            # Extract merchant name (first word that isn't all numbers)
+            merchant_parts = merchant_info.split()
+            merchant_name = []
+            for part in merchant_parts:
+                if not part.isdigit() and len(part) > 2:
+                    merchant_name.append(part)
+                if len(merchant_name) >= 2:
+                    break
+            if merchant_name:
+                continuation_map[cont_date_str] = ' '.join(merchant_name)
+
+        # Second pass: extract actual transactions
+        # Format: MM/DD Deposit|Withdrawal Description Amount Balance
+        # Example: 01/15 Deposit Online Banking Transfer From Share 70 15.00 20.00
+        # Example: 01/18 Withdrawal Debit Card 7.54- 47.46
+        lines = text.split('\n')
+
+        for line in lines:
+            # Skip lines that aren't transactions
+            if 'Balance Forward' in line or 'Ending Balance' in line:
+                continue
+            if 'Dividends Paid' in line or 'Annual Percentage' in line:
+                continue
+            if 'Combined Minimum' in line or 'Joint Owner' in line:
+                continue
+            if 'ID ' in line and 'Balance Forward' in line:
+                continue
+
+            # Match deposit transactions
+            # 01/15 Deposit Online Banking Transfer From Share 70 15.00 20.00
+            deposit_match = re.match(
+                r'^(\d{2}/\d{2})\s+Deposit\s+(.+?)\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s*$',
+                line.strip()
+            )
+            if deposit_match:
+                date_str, description, amount_str, balance_str = deposit_match.groups()
                 try:
-                    groups = match.groups()
-
-                    if len(groups) == 4:
-                        date_str, trans_type, description, amount_str = groups
-                        description = f"{trans_type} {description}"
-                    else:
-                        date_str, description, amount_str = groups
-
-                    if self._is_skip_line(description):
-                        continue
-
-                    trans_date = self._parse_date(f"{date_str}/{current_year}")
-                    if not trans_date:
-                        continue
-
-                    if trans_date > date.today():
-                        trans_date = trans_date.replace(year=trans_date.year - 1)
-
-                    amount = Decimal(amount_str.replace(',', '').replace('-', ''))
-                    if amount <= 0:
-                        continue
-
-                    transactions.append(ExtractedTransaction(
-                        date=trans_date,
-                        description=description.strip(),
-                        amount=amount,
-                        merchant=self._extract_merchant(description),
-                    ))
-
+                    trans_date = self._parse_date(f"{date_str}/{statement_year}")
+                    if trans_date:
+                        amount = Decimal(amount_str.replace(',', ''))
+                        transactions.append(ExtractedTransaction(
+                            date=trans_date,
+                            description=f"Deposit {description}",
+                            amount=amount,
+                            merchant=self._extract_merchant(description),
+                        ))
                 except Exception as e:
-                    logger.debug(f"Credit union parse error: {e}")
-                    continue
+                    logger.debug(f"Credit union deposit parse error: {e}")
+                continue
+
+            # Match withdrawal transactions
+            # 01/15 Withdrawal Online Banking Transfer To Share 01 15.00- 55.00
+            # 01/18 Withdrawal Debit Card 7.54- 47.46
+            withdrawal_match = re.match(
+                r'^(\d{2}/\d{2})\s+Withdrawal\s+(.+?)\s+([\d,]+\.\d{2})-?\s+([\d,]+\.\d{2})\s*$',
+                line.strip()
+            )
+            if withdrawal_match:
+                date_str, description, amount_str, balance_str = withdrawal_match.groups()
+                try:
+                    trans_date = self._parse_date(f"{date_str}/{statement_year}")
+                    if trans_date:
+                        amount = Decimal(amount_str.replace(',', ''))
+                        full_description = f"Withdrawal {description}"
+                        merchant = None
+
+                        # If debit card, look for merchant in continuation lines
+                        if 'Debit Card' in description:
+                            # Check a few days before for the continuation line
+                            month, day = map(int, date_str.split('/'))
+                            for offset in range(0, 3):
+                                check_day = day - offset
+                                if check_day < 1:
+                                    check_day = 28 + check_day
+                                    check_month = month - 1 if month > 1 else 12
+                                else:
+                                    check_month = month
+                                check_date_str = f"{check_month:02d}/{check_day:02d}"
+                                if check_date_str in continuation_map:
+                                    merchant = continuation_map[check_date_str]
+                                    full_description = f"{full_description} - {merchant}"
+                                    break
+
+                        if not merchant:
+                            merchant = self._extract_merchant(description)
+
+                        transactions.append(ExtractedTransaction(
+                            date=trans_date,
+                            description=full_description,
+                            amount=amount,
+                            merchant=merchant,
+                        ))
+                except Exception as e:
+                    logger.debug(f"Credit union withdrawal parse error: {e}")
+                continue
 
         return self._deduplicate(transactions)
 
@@ -753,7 +822,9 @@ Statement Text:
 
         skip_patterns = [
             r'^balance\s*(forward)?$',
+            r'balance\s+forward',  # Match anywhere in description
             r'^ending\s*balance',
+            r'ending\s+balance',  # Match anywhere
             r'^beginning\s*balance',
             r'^total\s+',
             r'^subtotal',
@@ -777,11 +848,14 @@ Statement Text:
             r'^transaction$',
             r'^merchant\s+name',
             r'^\$\s*amount$',
+            r'^id\s+\d+\s+.*balance\s+forward',  # Credit union account headers
+            r'^combined\s+minimum',  # Credit union minimum balance line
+            r'^joint\s+owner',  # Joint owner line
         ]
 
         desc_lower = description.lower().strip()
         for pattern in skip_patterns:
-            if re.match(pattern, desc_lower):
+            if re.search(pattern, desc_lower):
                 return True
 
         # Skip if too short
