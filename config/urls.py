@@ -12,6 +12,7 @@ urlpatterns = [
     path('', include('apps.analytics.urls')),  # Dashboard is home
     path('statements/', include('apps.statements.urls')),
     path('transactions/', include('apps.transactions.urls')),
+    path('financial-accounts/', include('apps.accounts_financial.urls')),
     path('budgets/', include('apps.budgets.urls')),
     path('advisor/', include('apps.advisor.urls')),
     path('cashie/', include('apps.cashie.urls')),

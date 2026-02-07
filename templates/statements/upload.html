@@ -22,6 +22,15 @@
                     </div>
 
                     <div class="mb-4">
+                        <label for="id_account" class="form-label">Link to Account</label>
+                        {{ form.account }}
+                        <div class="form-text">
+                            {{ form.account.help_text }}
+                            <a href="{% url 'accounts_financial:create' %}">Create a new account</a>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
                         <label for="id_statement_file" class="form-label">Statement PDF</label>
                         <div class="border rounded p-4 text-center bg-light">
                             <i class="bi bi-file-earmark-pdf fs-1 text-danger mb-2"></i>
@@ -32,6 +41,14 @@
                         {% if form.statement_file.errors %}
                         <div class="text-danger small mt-1">{{ form.statement_file.errors.0 }}</div>
                         {% endif %}
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        {{ form.create_balance_snapshot }}
+                        <label for="id_create_balance_snapshot" class="form-check-label">
+                            {{ form.create_balance_snapshot.label }}
+                        </label>
+                        <div class="form-text">{{ form.create_balance_snapshot.help_text }}</div>
                     </div>
 
                     <div class="d-grid">

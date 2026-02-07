@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'accounts_financial:list' %}">Accounts</a></li>
+                {% if account %}
+                <li class="breadcrumb-item"><a href="{% url 'accounts_financial:detail' account.pk %}">{{ account.name }}</a></li>
+                {% endif %}
+                <li class="breadcrumb-item active">{{ title }}</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Account Name <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="invalid-feedback d-block">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_account_type" class="form-label">Account Type <span class="text-danger">*</span></label>
+                            {{ form.account_type }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_institution" class="form-label">Institution</label>
+                            {{ form.institution }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_last_four" class="form-label">Last 4 Digits</label>
+                            {{ form.last_four }}
+                            {% if form.last_four.errors %}
+                            <div class="invalid-feedback d-block">{{ form.last_four.errors.0 }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Optional identifier</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_color" class="form-label">Color</label>
+                            {{ form.color }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_initial_balance" class="form-label">Initial Balance</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.initial_balance }}
+                            </div>
+                            <small class="form-text text-muted">Balance when you start tracking</small>
+                        </div>
+                        <div class="col-md-6" id="credit-limit-field">
+                            <label for="id_credit_limit" class="form-label">Credit Limit</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.credit_limit }}
+                            </div>
+                            <small class="form-text text-muted">For credit cards only</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.is_active }}
+                        <label for="id_is_active" class="form-check-label">Active Account</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% if account %}{% url 'accounts_financial:detail' account.pk %}{% else %}{% url 'accounts_financial:list' %}{% endif %}"
+                           class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            {{ submit_text }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const accountTypeSelect = document.getElementById('id_account_type');
+    const creditLimitField = document.getElementById('credit-limit-field');
+
+    function toggleCreditLimit() {
+        if (accountTypeSelect.value === 'credit_card') {
+            creditLimitField.style.display = 'block';
+        } else {
+            creditLimitField.style.display = 'none';
+        }
+    }
+
+    accountTypeSelect.addEventListener('change', toggleCreditLimit);
+    toggleCreditLimit(); // Initial state
+});
+</script>
+{% endblock %}

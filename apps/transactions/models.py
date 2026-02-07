@@ -5,8 +5,27 @@ from django.conf import settings
 from apps.budgets.models import SpendingType, CSPBucket
 
 
+class TransactionType(models.TextChoices):
+    """Type of transaction for balance calculations."""
+    PURCHASE = 'purchase', 'Purchase'
+    PAYMENT = 'payment', 'Payment'
+    TRANSFER = 'transfer', 'Transfer'
+    REFUND = 'refund', 'Refund'
+    DEPOSIT = 'deposit', 'Deposit'
+    WITHDRAWAL = 'withdrawal', 'Withdrawal'
+    FEE = 'fee', 'Fee'
+    INTEREST = 'interest', 'Interest'
+
+
+class TransactionStatus(models.TextChoices):
+    """Status of a transaction (pending, posted, cleared)."""
+    PENDING = 'pending', 'Pending'
+    POSTED = 'posted', 'Posted'
+    CLEARED = 'cleared', 'Cleared'
+
+
 class Transaction(models.Model):
-    """Represents a single credit card transaction."""
+    """Represents a single financial transaction."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -21,6 +40,36 @@ class Transaction(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name='transactions'
+    )
+
+    # Account link
+    account = models.ForeignKey(
+        'accounts_financial.Account',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='transactions'
+    )
+
+    # Transaction type and status
+    transaction_type = models.CharField(
+        max_length=20,
+        choices=TransactionType.choices,
+        default=TransactionType.PURCHASE
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=TransactionStatus.choices,
+        default=TransactionStatus.POSTED
+    )
+
+    # Transfer linking (self-referential for transfer pairs)
+    transfer_pair = models.OneToOneField(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='linked_transfer'
     )
 
     # Core fields
@@ -66,10 +115,22 @@ class Transaction(models.Model):
             models.Index(fields=['user', 'date']),
             models.Index(fields=['user', 'category']),
             models.Index(fields=['user', 'merchant']),
+            models.Index(fields=['account', 'date']),
+            models.Index(fields=['account', 'status']),
         ]
 
     def __str__(self):
         return f"{self.date} - {self.description[:30]} - ${self.amount}"
+
+    @property
+    def is_pending(self):
+        """Returns True if transaction is pending."""
+        return self.status == TransactionStatus.PENDING
+
+    @property
+    def is_transfer(self):
+        """Returns True if this is a transfer transaction."""
+        return self.transaction_type == TransactionType.TRANSFER or self.transfer_pair is not None
 
     @property
     def spending_type(self):

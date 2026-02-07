@@ -1,0 +1,63 @@
+<div class="card h-100" style="border-left: 4px solid {{ account_data.account.color }};">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+                <h6 class="card-title mb-1">{{ account_data.account.name }}</h6>
+                <small class="text-muted">
+                    {{ account_data.account.get_account_type_display }}
+                    {% if account_data.account.institution %}
+                    &middot; {{ account_data.account.institution }}
+                    {% endif %}
+                    {% if account_data.account.last_four %}
+                    &middot; ****{{ account_data.account.last_four }}
+                    {% endif %}
+                </small>
+            </div>
+            {% if not account_data.account.is_active %}
+            <span class="badge bg-secondary">Inactive</span>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {% if account_data.account.is_liability %}
+            <div class="text-danger fw-bold fs-4">
+                ${{ account_data.current_balance|floatformat:2 }}
+            </div>
+            {% if account_data.account.credit_limit %}
+            <div class="progress mt-2" style="height: 6px;">
+                {% widthratio account_data.current_balance account_data.account.credit_limit 100 as utilization %}
+                <div class="progress-bar {% if utilization > 30 %}bg-warning{% endif %}{% if utilization > 70 %}bg-danger{% endif %}"
+                     style="width: {{ utilization }}%;"></div>
+            </div>
+            <small class="text-muted">
+                ${{ account_data.current_balance|floatformat:0 }} / ${{ account_data.account.credit_limit|floatformat:0 }} limit
+            </small>
+            {% endif %}
+            {% else %}
+            <div class="text-success fw-bold fs-4">
+                ${{ account_data.current_balance|floatformat:2 }}
+            </div>
+            {% endif %}
+
+            {% if account_data.has_pending %}
+            <small class="text-muted d-block mt-1">
+                <i class="bi bi-clock"></i> Posted: ${{ account_data.posted_balance|floatformat:2 }}
+            </small>
+            {% endif %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                {% if account_data.account.transaction_count %}
+                {{ account_data.account.transaction_count }} transaction{{ account_data.account.transaction_count|pluralize }}
+                {% else %}
+                No transactions
+                {% endif %}
+            </small>
+            <a href="{% url 'accounts_financial:detail' account_data.account.pk %}"
+               class="btn btn-sm btn-outline-secondary">
+                View <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+</div>

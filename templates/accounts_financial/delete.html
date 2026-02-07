@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ account.name }} - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'accounts_financial:list' %}">Accounts</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'accounts_financial:detail' account.pk %}">{{ account.name }}</a></li>
+                <li class="breadcrumb-item active">Delete</li>
+            </ol>
+        </nav>
+
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Delete Account</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">
+                    Are you sure you want to delete <strong>{{ account.name }}</strong>?
+                </p>
+
+                {% if transaction_count or statement_count %}
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> This will affect:
+                    <ul class="mb-0 mt-2">
+                        {% if transaction_count %}
+                        <li>{{ transaction_count }} transaction{{ transaction_count|pluralize }} will be unlinked from this account</li>
+                        {% endif %}
+                        {% if statement_count %}
+                        <li>{{ statement_count }} statement{{ statement_count|pluralize }} will be unlinked from this account</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <p class="text-muted">
+                    This action cannot be undone. The account and its balance history will be permanently deleted.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'accounts_financial:detail' account.pk %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Delete Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

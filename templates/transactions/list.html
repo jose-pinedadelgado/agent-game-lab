@@ -26,12 +26,24 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <input type="date" name="date_from" class="form-control" placeholder="From"
-                       value="{{ request.GET.date_from }}">
+                <select name="account" class="form-select">
+                    <option value="">All Accounts</option>
+                    {% for acc in accounts %}
+                    <option value="{{ acc.pk }}" {% if current_account == acc.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ acc.name }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-2">
-                <input type="date" name="date_to" class="form-control" placeholder="To"
-                       value="{{ request.GET.date_to }}">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-3">
                 <button type="submit" class="btn btn-primary">
@@ -40,6 +52,16 @@
                 <a href="{% url 'transactions:list' %}" class="btn btn-outline-secondary">Clear</a>
             </div>
         </form>
+        <div class="row g-3 mt-1">
+            <div class="col-md-2">
+                <input type="date" name="date_from" class="form-control" placeholder="From"
+                       value="{{ request.GET.date_from }}" form="filter-form">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_to" class="form-control" placeholder="To"
+                       value="{{ request.GET.date_to }}" form="filter-form">
+            </div>
+        </div>
     </div>
 </div>
 
@@ -52,22 +74,40 @@
                 <tr>
                     <th>Date</th>
                     <th>Description</th>
+                    <th>Account</th>
                     <th>Category</th>
                     <th class="text-end">Amount</th>
+                    <th>Status</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for txn in page_obj %}
-                <tr>
+                <tr class="{% if txn.is_pending %}table-light{% endif %}">
                     <td>{{ txn.date|date:"M d, Y" }}</td>
                     <td>
-                        {{ txn.description|truncatechars:50 }}
+                        {{ txn.description|truncatechars:40 }}
+                        {% if txn.transfer_pair %}
+                        <a href="{% url 'accounts_financial:detail' txn.transfer_pair.account.pk %}"
+                           class="text-decoration-none ms-1" title="Transfer to {{ txn.transfer_pair.account.name }}">
+                            <i class="bi bi-arrow-left-right text-primary"></i>
+                        </a>
+                        {% endif %}
                         {% if txn.is_flagged %}
                         <i class="bi bi-flag-fill text-warning ms-1"></i>
                         {% endif %}
                         {% if txn.is_recurring %}
                         <i class="bi bi-arrow-repeat text-info ms-1"></i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if txn.account %}
+                        <a href="{% url 'accounts_financial:detail' txn.account.pk %}"
+                           class="text-decoration-none" style="color: {{ txn.account.color }};">
+                            {{ txn.account.name|truncatechars:15 }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">-</span>
                         {% endif %}
                     </td>
                     <td>
@@ -83,6 +123,17 @@
                     </td>
                     <td class="text-end">
                         <span class="text-danger">${{ txn.amount|floatformat:2 }}</span>
+                    </td>
+                    <td>
+                        {% if txn.is_pending %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-clock"></i> Pending
+                        </span>
+                        {% else %}
+                        <span class="badge bg-success-subtle text-success">
+                            {{ txn.get_status_display }}
+                        </span>
+                        {% endif %}
                     </td>
                     <td>
                         <a href="{% url 'transactions:detail' txn.pk %}" class="btn btn-sm btn-outline-secondary">

@@ -3,19 +3,30 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 
-from .models import Transaction
+from .models import Transaction, TransactionStatus
 from apps.budgets.models import BudgetCategory, SpendingType, CSPBucket
+from apps.accounts_financial.models import Account
 
 
 @login_required
 def transaction_list(request):
     """Display paginated list of user transactions with filters."""
-    transactions = Transaction.objects.filter(user=request.user).select_related('category', 'statement')
+    transactions = Transaction.objects.filter(user=request.user).select_related(
+        'category', 'statement', 'account', 'transfer_pair__account'
+    )
 
     # Apply filters
     category_id = request.GET.get('category')
     if category_id:
         transactions = transactions.filter(category_id=category_id)
+
+    account_id = request.GET.get('account')
+    if account_id:
+        transactions = transactions.filter(account_id=account_id)
+
+    status = request.GET.get('status')
+    if status:
+        transactions = transactions.filter(status=status)
 
     search = request.GET.get('search')
     if search:
@@ -35,12 +46,17 @@ def transaction_list(request):
     page_obj = paginator.get_page(page_number)
 
     categories = BudgetCategory.objects.filter(user=request.user)
+    accounts = Account.objects.filter(user=request.user, is_active=True)
 
     context = {
         'page_obj': page_obj,
         'categories': categories,
+        'accounts': accounts,
         'current_category': category_id,
+        'current_account': account_id,
+        'current_status': status,
         'search': search or '',
+        'status_choices': TransactionStatus.choices,
     }
 
     # Return partial for HTMX requests

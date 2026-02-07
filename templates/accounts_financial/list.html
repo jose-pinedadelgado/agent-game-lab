@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Accounts - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Accounts</h2>
+    <a href="{% url 'accounts_financial:create' %}" class="btn btn-success">
+        <i class="bi bi-plus-lg"></i> Add Account
+    </a>
+</div>
+
+<!-- Net Worth Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="stat-label">Total Assets</div>
+            <div class="stat-value text-success">
+                ${{ net_worth_summary.total_assets|floatformat:2|default:"0.00" }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="stat-label">Total Liabilities</div>
+            <div class="stat-value text-danger">
+                ${{ net_worth_summary.total_liabilities|floatformat:2|default:"0.00" }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="stat-label">Net Worth</div>
+            <div class="stat-value {% if net_worth_summary.net_worth >= 0 %}text-success{% else %}text-danger{% endif %}">
+                ${{ net_worth_summary.net_worth|floatformat:2|default:"0.00" }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mb-4">
+    <a href="{% url 'accounts_financial:create_transfer' %}" class="btn btn-outline-primary btn-sm me-2">
+        <i class="bi bi-arrow-left-right"></i> Transfer
+    </a>
+    <a href="{% url 'accounts_financial:create_cc_payment' %}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-credit-card"></i> CC Payment
+    </a>
+</div>
+
+<!-- Active Accounts -->
+{% if active_accounts %}
+<h5 class="text-muted mb-3">Active Accounts</h5>
+<div class="row g-3 mb-4">
+    {% for item in active_accounts %}
+    <div class="col-md-6 col-lg-4">
+        {% include 'accounts_financial/partials/_account_card.html' with account_data=item %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-wallet2 display-4 text-muted"></i>
+        <h5 class="mt-3">No accounts yet</h5>
+        <p class="text-muted">Add your first account to start tracking your finances.</p>
+        <a href="{% url 'accounts_financial:create' %}" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Add Account
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Inactive Accounts Toggle -->
+{% if inactive_accounts %}
+<div class="mb-3">
+    <a href="?show_inactive={% if show_inactive %}false{% else %}true{% endif %}"
+       class="text-muted text-decoration-none">
+        <i class="bi bi-{% if show_inactive %}chevron-up{% else %}chevron-down{% endif %}"></i>
+        {% if show_inactive %}Hide{% else %}Show{% endif %} {{ inactive_accounts|length }} inactive account{{ inactive_accounts|length|pluralize }}
+    </a>
+</div>
+
+{% if show_inactive %}
+<div class="row g-3 mb-4">
+    {% for item in inactive_accounts %}
+    <div class="col-md-6 col-lg-4">
+        {% include 'accounts_financial/partials/_account_card.html' with account_data=item %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+
+{% endblock %}

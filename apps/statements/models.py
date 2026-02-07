@@ -21,6 +21,13 @@ class CreditCardStatement(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    account = models.ForeignKey(
+        'accounts_financial.Account',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='statements'
+    )
     statement_file = models.FileField(upload_to='statements/%Y/%m/')
     original_filename = models.CharField(max_length=255, blank=True)
     bank_name = models.CharField(max_length=20, choices=Bank.choices, default=Bank.OTHER)

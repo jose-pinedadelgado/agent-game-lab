@@ -174,6 +174,10 @@
                        href="{% url 'transactions:list' %}">
                         <i class="bi bi-list-ul"></i> Transactions
                     </a>
+                    <a class="nav-link {% if 'financial-accounts' in request.path %}active{% endif %}"
+                       href="{% url 'accounts_financial:list' %}">
+                        <i class="bi bi-wallet2"></i> Accounts
+                    </a>
                     <a class="nav-link {% if 'budgets' in request.path and 'alerts' not in request.path %}active{% endif %}"
                        href="{% url 'budgets:manage' %}">
                         <i class="bi bi-wallet2"></i> Budgets
