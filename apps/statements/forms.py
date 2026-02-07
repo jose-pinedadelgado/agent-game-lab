@@ -3,7 +3,7 @@ from .models import CreditCardStatement
 
 
 class StatementUploadForm(forms.ModelForm):
-    """Form for uploading credit card statements."""
+    """Form for uploading credit card statements (PDF or CSV)."""
 
     class Meta:
         model = CreditCardStatement
@@ -12,7 +12,7 @@ class StatementUploadForm(forms.ModelForm):
             'bank_name': forms.Select(attrs={'class': 'form-select'}),
             'statement_file': forms.FileInput(attrs={
                 'class': 'form-control',
-                'accept': '.pdf'
+                'accept': '.pdf,.csv'
             }),
         }
 
@@ -20,8 +20,9 @@ class StatementUploadForm(forms.ModelForm):
         file = self.cleaned_data.get('statement_file')
         if file:
             # Check file extension
-            if not file.name.lower().endswith('.pdf'):
-                raise forms.ValidationError('Only PDF files are allowed.')
+            name_lower = file.name.lower()
+            if not (name_lower.endswith('.pdf') or name_lower.endswith('.csv')):
+                raise forms.ValidationError('Only PDF and CSV files are allowed.')
             # Check file size (10 MB limit)
             if file.size > 10 * 1024 * 1024:
                 raise forms.ValidationError('File size must be less than 10 MB.')

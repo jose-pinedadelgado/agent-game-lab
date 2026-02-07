@@ -66,3 +66,6 @@ nul
 
 # Misc
 error.txt
+
+# Test files (contain personal financial data)
+test_files/
