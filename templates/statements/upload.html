@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Statement - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-upload me-2"></i>Upload Statement
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label for="id_bank_name" class="form-label">Bank / Card Issuer</label>
+                        {{ form.bank_name }}
+                        <div class="form-text">Select your bank for better parsing accuracy.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_statement_file" class="form-label">Statement PDF</label>
+                        <div class="border rounded p-4 text-center bg-light">
+                            <i class="bi bi-file-earmark-pdf fs-1 text-danger mb-2"></i>
+                            <p class="mb-2">Drag and drop your PDF here, or click to browse</p>
+                            {{ form.statement_file }}
+                            <p class="text-muted small mt-2">Maximum file size: 10 MB</p>
+                        </div>
+                        {% if form.statement_file.errors %}
+                        <div class="text-danger small mt-1">{{ form.statement_file.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-cloud-upload me-2"></i>Upload & Process
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6><i class="bi bi-shield-check me-2 text-success"></i>Privacy & Security</h6>
+                    <ul class="small text-muted mb-0">
+                        <li>Your statements are processed securely</li>
+                        <li>We never store your full card numbers</li>
+                        <li>Data is encrypted at rest and in transit</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'statements:history' %}" class="text-muted">
+                <i class="bi bi-clock-history me-1"></i>View Upload History
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Category Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_monthly_limit" class="form-label">Monthly Budget Limit ($)</label>
+                        {{ form.monthly_limit }}
+                        {% if form.monthly_limit.errors %}
+                        <div class="text-danger small mt-1">{{ form.monthly_limit.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_color" class="form-label">Color</label>
+                        <div class="d-flex align-items-center">
+                            {{ form.color }}
+                            <span class="ms-2 badge" id="colorPreview" style="background-color: {{ form.color.value|default:'#3B82F6' }}">
+                                Preview
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Save
+                        </button>
+                        <a href="{% url 'budgets:manage' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('id_color').addEventListener('input', function(e) {
+    document.getElementById('colorPreview').style.backgroundColor = e.target.value;
+});
+</script>
+{% endblock %}

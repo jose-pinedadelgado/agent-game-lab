@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Categories - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Budget Categories</h1>
+        <p class="text-muted mb-0">{{ month_name }}</p>
+    </div>
+    <a href="{% url 'budgets:create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Add Category
+    </a>
+</div>
+
+<div class="row g-4">
+    {% for item in category_data %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge mb-2" style="background-color: {{ item.category.color }}">
+                            {{ item.category.name }}
+                        </span>
+                        <h4 class="mb-0">${{ item.spent|floatformat:0 }}</h4>
+                        <small class="text-muted">of ${{ item.category.monthly_limit|floatformat:0 }} budget</small>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'budgets:edit' item.category.pk %}">
+                                <i class="bi bi-pencil me-2"></i>Edit
+                            </a></li>
+                            {% if item.category.name != 'Other' %}
+                            <li><a class="dropdown-item text-danger" href="{% url 'budgets:delete' item.category.pk %}">
+                                <i class="bi bi-trash me-2"></i>Delete
+                            </a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar bg-{{ item.status_class }}"
+                         role="progressbar"
+                         style="width: {{ item.percentage }}%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between small">
+                    <span class="{% if item.over_budget %}text-danger{% else %}text-muted{% endif %}">
+                        {{ item.percentage|floatformat:0 }}% used
+                    </span>
+                    <span class="{% if item.remaining < 0 %}text-danger{% else %}text-success{% endif %}">
+                        {% if item.remaining >= 0 %}
+                        ${{ item.remaining|floatformat:0 }} left
+                        {% else %}
+                        ${{ item.remaining|floatformat:0|slice:"1:" }} over
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="bi bi-wallet2 fs-1 text-muted"></i>
+            <p class="mt-2 text-muted">No budget categories yet</p>
+            <a href="{% url 'budgets:create' %}" class="btn btn-primary">Create Your First Category</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

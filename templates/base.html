@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bamboo Money{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        // Configure HTMX to include CSRF token in all requests
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.addEventListener('htmx:configRequest', function(event) {
+                // Get CSRF token from cookie
+                const csrfToken = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+                if (csrfToken) {
+                    event.detail.headers['X-CSRFToken'] = csrfToken;
+                }
+            });
+        });
+    </script>
+
+    <style>
+        :root {
+            --bamboo-green: #10B981;
+            --bamboo-dark: #064E3B;
+        }
+        body {
+            background-color: #f8fafc;
+            min-height: 100vh;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--bamboo-green) !important;
+        }
+        .navbar-brand i {
+            color: var(--bamboo-dark);
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background: white;
+            border-right: 1px solid #e2e8f0;
+        }
+        .sidebar .nav-link {
+            color: #475569;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0.5rem;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #f1f5f9;
+        }
+        .sidebar .nav-link.active {
+            background-color: #ecfdf5;
+            color: var(--bamboo-green);
+            font-weight: 500;
+        }
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 0.75rem;
+        }
+        .stat-card {
+            padding: 1.5rem;
+        }
+        .stat-card .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .stat-card .stat-label {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+        .table th {
+            font-weight: 500;
+            color: #64748b;
+            border-bottom-width: 1px;
+        }
+        .badge-category {
+            font-weight: 500;
+            padding: 0.35rem 0.65rem;
+        }
+        .main-content {
+            padding: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'analytics:dashboard' %}">
+                <i class="bi bi-tree"></i> Bamboo Money
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'budgets:alerts' %}">
+                            <i class="bi bi-bell"></i>
+                            {% if unread_alerts %}
+                            <span class="badge bg-danger">{{ unread_alerts }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ user.email }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_signup' %}">Sign Up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            {% if user.is_authenticated %}
+            <div class="col-md-3 col-lg-2 sidebar p-0">
+                <nav class="nav flex-column py-3">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                       href="{% url 'analytics:dashboard' %}">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link {% if 'statements' in request.path %}active{% endif %}"
+                       href="{% url 'statements:upload' %}">
+                        <i class="bi bi-upload"></i> Upload Statement
+                    </a>
+                    <a class="nav-link {% if 'transactions' in request.path %}active{% endif %}"
+                       href="{% url 'transactions:list' %}">
+                        <i class="bi bi-list-ul"></i> Transactions
+                    </a>
+                    <a class="nav-link {% if 'budgets' in request.path and 'alerts' not in request.path %}active{% endif %}"
+                       href="{% url 'budgets:manage' %}">
+                        <i class="bi bi-wallet2"></i> Budgets
+                    </a>
+                    <a class="nav-link {% if 'advisor' in request.path %}active{% endif %}"
+                       href="{% url 'advisor:insights' %}">
+                        <i class="bi bi-lightbulb"></i> Insights
+                    </a>
+                </nav>
+            </div>
+            {% endif %}
+
+            <!-- Main Content -->
+            <main class="{% if user.is_authenticated %}col-md-9 col-lg-10{% else %}col-12{% endif %} main-content">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

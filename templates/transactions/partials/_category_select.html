@@ -1,0 +1,14 @@
+<select class="form-select form-select-sm"
+        hx-post="{% url 'transactions:update_category' transaction.pk %}"
+        hx-target="#category-{{ transaction.pk }}"
+        hx-swap="innerHTML"
+        name="category"
+        style="min-width: 120px; background-color: {{ transaction.category.color }}20;">
+    {% for cat in categories %}
+    <option value="{{ cat.pk }}"
+            {% if cat == transaction.category %}selected{% endif %}
+            style="background-color: {{ cat.color }}20;">
+        {{ cat.name }}
+    </option>
+    {% endfor %}
+</select>

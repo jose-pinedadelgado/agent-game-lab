@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Transactions - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Transactions</h1>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control" placeholder="Search..."
+                       value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.pk }}" {% if current_category == cat.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_from" class="form-control" placeholder="From"
+                       value="{{ request.GET.date_from }}">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="date_to" class="form-control" placeholder="To"
+                       value="{{ request.GET.date_to }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-1"></i>Filter
+                </button>
+                <a href="{% url 'transactions:list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Transaction List -->
+<div class="card">
+    <div class="card-body p-0">
+        {% if page_obj %}
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th class="text-end">Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in page_obj %}
+                <tr>
+                    <td>{{ txn.date|date:"M d, Y" }}</td>
+                    <td>
+                        {{ txn.description|truncatechars:50 }}
+                        {% if txn.is_flagged %}
+                        <i class="bi bi-flag-fill text-warning ms-1"></i>
+                        {% endif %}
+                        {% if txn.is_recurring %}
+                        <i class="bi bi-arrow-repeat text-info ms-1"></i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div id="category-{{ txn.pk }}" class="d-flex align-items-center gap-2">
+                            {% include 'transactions/partials/_category_select.html' with transaction=txn %}
+                            {% if txn.ai_confidence and not txn.user_confirmed %}
+                            <span class="badge bg-info-subtle text-info"
+                                  title="AI suggested ({{ txn.ai_confidence|floatformat:0 }}% confidence)">
+                                <i class="bi bi-robot"></i> {{ txn.ai_confidence|floatformat:0 }}%
+                            </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="text-end">
+                        <span class="text-danger">${{ txn.amount|floatformat:2 }}</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'transactions:detail' txn.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav class="px-3 py-2 border-top">
+            <ul class="pagination pagination-sm mb-0 justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <p class="mt-2 text-muted">No transactions found</p>
+            {% if search or current_category %}
+            <a href="{% url 'transactions:list' %}" class="btn btn-outline-primary">Clear Filters</a>
+            {% else %}
+            <a href="{% url 'statements:upload' %}" class="btn btn-primary">Upload Statement</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

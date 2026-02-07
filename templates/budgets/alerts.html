@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Spending Alerts - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Spending Alerts</h1>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if alerts %}
+        <div class="list-group list-group-flush">
+            {% for alert in alerts %}
+            <div class="list-group-item {% if not alert.is_read %}bg-light{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            {% if alert.alert_type == 'over_budget' %}
+                            <i class="bi bi-exclamation-triangle-fill text-danger fs-4"></i>
+                            {% elif alert.alert_type == 'approaching' %}
+                            <i class="bi bi-exclamation-circle-fill text-warning fs-4"></i>
+                            {% elif alert.alert_type == 'large_transaction' %}
+                            <i class="bi bi-cash-stack text-info fs-4"></i>
+                            {% else %}
+                            <i class="bi bi-info-circle-fill text-secondary fs-4"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h6 class="mb-1">{{ alert.get_alert_type_display }}</h6>
+                            <p class="mb-1">{{ alert.message }}</p>
+                            <small class="text-muted">{{ alert.created_at|timesince }} ago</small>
+                        </div>
+                    </div>
+                    <div>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="alert_id" value="{{ alert.pk }}">
+                            {% if not alert.is_read %}
+                            <button type="submit" name="action" value="read" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-check"></i>
+                            </button>
+                            {% endif %}
+                            <button type="submit" name="action" value="dismiss" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-bell-slash fs-1 text-muted"></i>
+            <p class="mt-2 text-muted">No alerts at this time</p>
+            <p class="small text-muted">Alerts will appear when you approach or exceed budget limits.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

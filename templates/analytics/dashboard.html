@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Dashboard</h1>
+    <form method="get" class="d-flex align-items-center gap-2">
+        <select name="month" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+            {% for num, name in months %}
+            <option value="{{ num }}" {% if num == selected_month %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+        <select name="year" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+            {% for year in years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="stat-label">Total Spending</div>
+            <div class="stat-value text-danger">${{ total_spent|floatformat:2 }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="stat-label">Transactions</div>
+            <div class="stat-value">{{ transaction_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="stat-label">Top Category</div>
+            <div class="stat-value" style="font-size: 1.25rem;">
+                {% if top_category %}
+                <span class="badge" style="background-color: {{ top_category.category__color }}">
+                    {{ top_category.category__name }}
+                </span>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="stat-label">Budget Health</div>
+            <div class="stat-value {% if budget_health >= 50 %}text-success{% elif budget_health >= 20 %}text-warning{% else %}text-danger{% endif %}">
+                {{ budget_health|floatformat:0 }}%
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Spending by Category Chart -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Spending by Category</h5>
+            </div>
+            <div class="card-body">
+                {% if spending_by_category %}
+                <canvas id="categoryChart" height="250"></canvas>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-pie-chart fs-1"></i>
+                    <p class="mt-2">No transactions this month</p>
+                    <a href="{% url 'statements:upload' %}" class="btn btn-primary btn-sm">Upload Statement</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Progress -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Budget Status ({{ month_name }})</h5>
+                <a href="{% url 'budgets:manage' %}" class="btn btn-sm btn-outline-primary">Manage</a>
+            </div>
+            <div class="card-body">
+                {% if category_progress %}
+                {% for item in category_progress %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>
+                            <span class="badge me-1" style="background-color: {{ item.category.color }}">
+                                {{ item.category.name }}
+                            </span>
+                        </span>
+                        <span class="text-muted small">
+                            ${{ item.spent|floatformat:0 }} / ${{ item.category.monthly_limit|floatformat:0 }}
+                        </span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-{{ item.status_class }}"
+                             role="progressbar"
+                             style="width: {{ item.percentage }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <p>No budget categories set up</p>
+                    <a href="{% url 'budgets:create' %}" class="btn btn-primary btn-sm">Create Category</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transactions for Selected Month -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Transactions ({{ month_name }})</h5>
+                <a href="{% url 'transactions:list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_transactions %}
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in recent_transactions %}
+                        <tr>
+                            <td>{{ txn.date|date:"M d" }}</td>
+                            <td>{{ txn.description|truncatechars:40 }}</td>
+                            <td>
+                                {% if txn.category %}
+                                <span class="badge badge-category" style="background-color: {{ txn.category.color }}">
+                                    {{ txn.category.name }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">Uncategorized</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end text-danger">${{ txn.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-2">No transactions yet</p>
+                    <a href="{% url 'statements:upload' %}" class="btn btn-primary">Upload Your First Statement</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if spending_by_category %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for item in spending_by_category %}'{{ item.category__name|default:"Uncategorized" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for item in spending_by_category %}{{ item.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: [{% for item in spending_by_category %}'{{ item.category__color|default:"#9CA3AF" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.parsed.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Bamboo Money{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person-circle me-2"></i>Your Profile
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                         style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-fill text-primary fs-1"></i>
+                    </div>
+                </div>
+
+                <table class="table">
+                    <tr>
+                        <th class="text-muted">Email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Name</th>
+                        <td>{{ user.get_full_name|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Member Since</th>
+                        <td>{{ user.date_joined|date:"F d, Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Currency</th>
+                        <td>{{ user.preferred_currency }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Timezone</th>
+                        <td>{{ user.timezone }}</td>
+                    </tr>
+                </table>
+
+                <hr>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'account_change_password' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-key me-1"></i>Change Password
+                    </a>
+                    <a href="{% url 'account_logout' %}" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right me-1"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
