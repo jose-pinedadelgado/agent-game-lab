@@ -176,6 +176,27 @@ class LLMAgentConfig(BaseModel):
     output: OutputConfig = Field(default_factory=OutputConfig)
 
 
+class CrewAIAgentConfig(BaseModel):
+    """CrewAI-style agent configuration with role/goal/backstory."""
+
+    type: Literal["crewai"] = "crewai"
+    # Inline definition
+    role: str | None = None
+    goal: str | None = None
+    backstory: str | None = None
+    # OR reference to multi-agent file
+    agents_file: str | None = None  # e.g. "agents/crewai/agents.yaml"
+    agent_key: str | None = None  # e.g. "strategic_cooperator"
+    # LLM settings (same fields as LLMAgentConfig)
+    provider: str = "mock"
+    model: str = "mock-001"
+    temperature: float = 0.0
+    max_tokens: int = 10
+    mock: MockConfig = Field(default_factory=MockConfig)
+    prompting: PromptingConfig = Field(default_factory=PromptingConfig)
+    output: OutputConfig = Field(default_factory=OutputConfig)
+
+
 class PolicyParams(BaseModel):
     """Parameters for policy agents."""
 

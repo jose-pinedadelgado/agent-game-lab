@@ -53,6 +53,26 @@ experiment:
         overrides:
           policy: "WSLS"
 
+    - name: "CrewAI_strategist_vs_TFT"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides:
+          agent_key: "strategic_cooperator"
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides:
+          policy: "TFT"
+
+    - name: "CrewAI_ruthless_vs_ALLD"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides:
+          agent_key: "ruthless_optimizer"
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides:
+          policy: "ALLD"
+
 metrics:
   collapse:
     k: 10

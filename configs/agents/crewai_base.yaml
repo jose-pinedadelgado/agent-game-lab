@@ -1,0 +1,25 @@
+type: "crewai"
+agents_file: "agents/crewai/agents.yaml"
+agent_key: "strategic_cooperator"
+provider: "mock"
+model: "mock-001"
+temperature: 0.0
+max_tokens: 10
+
+mock:
+  mode: "fixed"
+  fixed_output: "C"
+
+prompting:
+  system_prompt_path: "configs/prompts/pd_system.md"
+  round_prompt_path: "configs/prompts/pd_round.md"
+  persona: "_crewai"
+  history_window: 10
+  include_cumulative_totals: true
+
+output:
+  format: "single_token"
+  allowed: ["C", "D"]
+  retry:
+    max_retries: 2
+    on_invalid: "reprompt_same_context"

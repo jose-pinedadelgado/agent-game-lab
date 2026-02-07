@@ -122,6 +122,62 @@ class TestRunnerWithMockProvider:
         assert (output_dir / "rounds.jsonl").exists()
         assert (output_dir / "aggregates.parquet").exists()
 
+    def test_run_with_crewai_agent(
+        self, config_base_path: Path, temp_output_dir: Path
+    ) -> None:
+        """Test running with CrewAI agent using MockProvider."""
+        import json
+
+        config = FullExperimentConfig(
+            run=RunConfig(
+                run_id="test_crewai_run",
+                seed=42,
+                output_dir=str(temp_output_dir / "test_crewai_run"),
+                store_prompts=True,
+                store_raw_responses=True,
+            ),
+            game=GameConfig(),
+            horizon=HorizonConfig(type="fixed", n_rounds=5),
+            experiment=ExperimentConfig(
+                replicates=1,
+                conditions=[
+                    ConditionConfig(
+                        name="CrewAI_strategist_vs_TFT",
+                        agent_a=AgentRef(
+                            ref="agents/crewai_base.yaml",
+                            overrides={"agent_key": "strategic_cooperator"},
+                        ),
+                        agent_b=AgentRef(
+                            ref="agents/policies.yaml",
+                            overrides={"policy": "TFT"},
+                        ),
+                    ),
+                ],
+            ),
+            metrics=MetricsConfig(),
+        )
+
+        output_dir = run_experiment(
+            config=config,
+            config_base_path=config_base_path,
+        )
+
+        # Verify output files exist
+        assert (output_dir / "run_manifest.json").exists()
+        assert (output_dir / "rounds.jsonl").exists()
+        assert (output_dir / "aggregates.parquet").exists()
+
+        # Verify rounds were logged with correct condition name
+        rounds = []
+        with open(output_dir / "rounds.jsonl") as f:
+            for line in f:
+                rounds.append(json.loads(line))
+
+        assert len(rounds) == 5
+        assert all(r["condition"] == "CrewAI_strategist_vs_TFT" for r in rounds)
+        # MockProvider returns "C", so CrewAI agent (agent_a) should always play C
+        assert all(r["agent_a_action"] == "C" for r in rounds)
+
     def test_tft_vs_alld_behavior(
         self, config_base_path: Path, temp_output_dir: Path
     ) -> None:

@@ -49,6 +49,27 @@ def validate(
                 ref_path = config_base / "configs" / agent_ref.ref
                 if not ref_path.exists():
                     errors.append(f"Agent config not found: {ref_path}")
+                    continue
+
+                # Load agent config to check type-specific references
+                with open(ref_path) as af:
+                    agent_config = yaml.safe_load(af)
+                # Apply overrides for validation
+                merged = {**agent_config, **agent_ref.overrides}
+                if merged.get("type") == "crewai" and merged.get("agents_file"):
+                    agents_file_path = config_base / "configs" / merged["agents_file"]
+                    if not agents_file_path.exists():
+                        errors.append(
+                            f"CrewAI agents file not found: {agents_file_path}"
+                        )
+                    elif merged.get("agent_key"):
+                        with open(agents_file_path) as agf:
+                            agents_data = yaml.safe_load(agf)
+                        if merged["agent_key"] not in agents_data:
+                            errors.append(
+                                f"Agent key '{merged['agent_key']}' not found "
+                                f"in {agents_file_path}"
+                            )
 
         if errors:
             for err in errors:

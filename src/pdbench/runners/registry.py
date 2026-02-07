@@ -7,10 +7,12 @@ from typing import Any
 
 import yaml
 
+from pdbench.agents.crewai import CrewAIAgent
 from pdbench.agents.llm import LLMAgent
 from pdbench.agents.policy import create_policy_agent
 from pdbench.core.types import (
     AgentRef,
+    CrewAIAgentConfig,
     LLMAgentConfig,
     PolicyAgentConfig,
 )
@@ -61,6 +63,13 @@ def create_agent_from_ref(
         llm_config = LLMAgentConfig(**merged_config)
         return LLMAgent(
             config=llm_config,
+            config_base_path=config_base_path,
+        )
+
+    elif agent_type == "crewai":
+        crewai_config = CrewAIAgentConfig(**merged_config)
+        return CrewAIAgent(
+            config=crewai_config,
             config_base_path=config_base_path,
         )
 
