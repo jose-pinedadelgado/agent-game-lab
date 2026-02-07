@@ -9,6 +9,7 @@ import calendar
 
 from apps.transactions.models import Transaction
 from apps.budgets.models import BudgetCategory, SpendingAlert
+from apps.budgets.spending_analysis import get_spending_summary
 from apps.statements.models import CreditCardStatement
 
 
@@ -98,6 +99,10 @@ def dashboard(request):
         user=request.user, is_read=False, is_dismissed=False
     ).count()
 
+    # Calculate spending breakdowns (Wants/Needs, CSP) if enabled
+    transactions_for_analysis = transactions.select_related('category')
+    spending_summary = get_spending_summary(request.user, transactions_for_analysis)
+
     # Build month/year options for selector
     current_year = now.year
     years = list(range(current_year - 5, current_year + 1))
@@ -122,6 +127,11 @@ def dashboard(request):
         'years': years,
         'months': months,
         'available_months': available_months,
+        # Spending analysis
+        'spending_summary': spending_summary,
+        'enable_wants_needs': request.user.enable_wants_needs,
+        'enable_conscious_spending': request.user.enable_conscious_spending,
+        'monthly_income': request.user.monthly_income,
     }
 
     return render(request, 'analytics/dashboard.html', context)

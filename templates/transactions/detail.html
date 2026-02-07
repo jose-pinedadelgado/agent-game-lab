@@ -54,6 +54,12 @@
                     </div>
                 </div>
 
+                {% if enable_wants_needs or enable_conscious_spending %}
+                <hr>
+                <h6 class="text-muted mb-3">Spending Classification</h6>
+                {% include 'transactions/partials/_spending_overrides.html' %}
+                {% endif %}
+
                 <hr>
 
                 <div class="row">

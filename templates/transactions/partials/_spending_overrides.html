@@ -1,0 +1,59 @@
+{% if enable_wants_needs or enable_conscious_spending %}
+<div id="spending-overrides-{{ transaction.pk }}">
+    {% if enable_wants_needs %}
+    <div class="mb-3">
+        <label class="text-muted small">Spending Type</label>
+        <div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm" style="max-width: 200px;"
+                    hx-post="{% url 'transactions:update_spending' transaction.pk %}"
+                    hx-target="#spending-overrides-{{ transaction.pk }}"
+                    hx-swap="outerHTML"
+                    name="spending_type">
+                <option value="">-- Use Category Default --</option>
+                {% for value, label in spending_types %}
+                <option value="{{ value }}" {% if transaction.spending_type_override == value %}selected{% endif %}>
+                    {{ label }}{% if transaction.category.default_spending_type == value %} (default){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+            {% if transaction.spending_type %}
+            <span class="badge bg-{% if transaction.spending_type == 'need' %}primary{% elif transaction.spending_type == 'want' %}warning{% else %}success{% endif %}">
+                {{ transaction.get_spending_type_display_effective }}
+            </span>
+            {% if transaction.spending_type_override %}
+            <span class="text-muted small">(overridden)</span>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if enable_conscious_spending %}
+    <div class="mb-3">
+        <label class="text-muted small">CSP Bucket</label>
+        <div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm" style="max-width: 250px;"
+                    hx-post="{% url 'transactions:update_spending' transaction.pk %}"
+                    hx-target="#spending-overrides-{{ transaction.pk }}"
+                    hx-swap="outerHTML"
+                    name="csp_bucket">
+                <option value="">-- Use Category Default --</option>
+                {% for value, label in csp_buckets %}
+                <option value="{{ value }}" {% if transaction.csp_bucket_override == value %}selected{% endif %}>
+                    {{ label }}{% if transaction.category.default_csp_bucket == value %} (default){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+            {% if transaction.csp_bucket %}
+            <span class="badge bg-secondary">
+                {{ transaction.get_csp_bucket_display_effective }}
+            </span>
+            {% if transaction.csp_bucket_override %}
+            <span class="text-muted small">(overridden)</span>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}

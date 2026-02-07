@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 
 from .models import Transaction
-from apps.budgets.models import BudgetCategory
+from apps.budgets.models import BudgetCategory, SpendingType, CSPBucket
 
 
 @login_required
@@ -57,7 +57,11 @@ def transaction_detail(request, pk):
     categories = BudgetCategory.objects.filter(user=request.user)
     return render(request, 'transactions/detail.html', {
         'transaction': transaction,
-        'categories': categories
+        'categories': categories,
+        'spending_types': SpendingType.choices,
+        'csp_buckets': CSPBucket.choices,
+        'enable_wants_needs': request.user.enable_wants_needs,
+        'enable_conscious_spending': request.user.enable_conscious_spending,
     })
 
 
@@ -94,4 +98,31 @@ def update_category(request, pk):
     return render(request, 'transactions/partials/_category_select.html', {
         'transaction': transaction,
         'categories': categories
+    })
+
+
+@login_required
+def update_spending_override(request, pk):
+    """Update transaction spending type or CSP bucket override (HTMX endpoint)."""
+    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        # Update spending type override
+        if 'spending_type' in request.POST:
+            value = request.POST.get('spending_type')
+            transaction.spending_type_override = value if value else None
+            transaction.save(update_fields=['spending_type_override', 'updated_at'])
+
+        # Update CSP bucket override
+        if 'csp_bucket' in request.POST:
+            value = request.POST.get('csp_bucket')
+            transaction.csp_bucket_override = value if value else None
+            transaction.save(update_fields=['csp_bucket_override', 'updated_at'])
+
+    return render(request, 'transactions/partials/_spending_overrides.html', {
+        'transaction': transaction,
+        'spending_types': SpendingType.choices,
+        'csp_buckets': CSPBucket.choices,
+        'enable_wants_needs': request.user.enable_wants_needs,
+        'enable_conscious_spending': request.user.enable_conscious_spending,
     })

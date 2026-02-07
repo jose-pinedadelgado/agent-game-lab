@@ -4,8 +4,9 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="card">
+    <div class="col-lg-8">
+        <!-- Profile Info Card -->
+        <div class="card mb-4">
             <div class="card-header bg-white">
                 <h5 class="card-title mb-0">
                     <i class="bi bi-person-circle me-2"></i>Your Profile
@@ -52,6 +53,71 @@
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
                     </a>
                 </div>
+            </div>
+        </div>
+
+        <!-- Budgeting Settings Card -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-gear me-2"></i>Budgeting Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label for="id_monthly_income" class="form-label">{{ form.monthly_income.label }}</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.monthly_income }}
+                        </div>
+                        <div class="form-text">{{ form.monthly_income.help_text }}</div>
+                        {% if form.monthly_income.errors %}
+                        <div class="text-danger small mt-1">{{ form.monthly_income.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+                    <h6 class="text-muted mb-3">Advanced Tracking Features</h6>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            {{ form.enable_wants_needs }}
+                            <label class="form-check-label" for="id_enable_wants_needs">
+                                {{ form.enable_wants_needs.label }}
+                            </label>
+                        </div>
+                        <div class="form-text ms-4">{{ form.enable_wants_needs.help_text }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            {{ form.enable_conscious_spending }}
+                            <label class="form-check-label" for="id_enable_conscious_spending">
+                                {{ form.enable_conscious_spending.label }}
+                            </label>
+                        </div>
+                        <div class="form-text ms-4">{{ form.enable_conscious_spending.help_text }}</div>
+                    </div>
+
+                    {% if user.enable_conscious_spending %}
+                    <div class="alert alert-info small mb-4">
+                        <strong>Conscious Spending Plan Targets:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Fixed Costs:</strong> 50-60% of income (rent, utilities, groceries, insurance)</li>
+                            <li><strong>Investments:</strong> 10%+ of income (retirement, index funds)</li>
+                            <li><strong>Savings:</strong> 5-15%+ of income (emergency fund, vacation, big purchases)</li>
+                            <li><strong>Guilt-Free Spending:</strong> 20-35% of income (dining, entertainment, hobbies)</li>
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>Save Settings
+                    </button>
+                </form>
             </div>
         </div>
     </div>

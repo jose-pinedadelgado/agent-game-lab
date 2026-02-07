@@ -117,6 +117,102 @@
     </div>
 </div>
 
+{% if enable_wants_needs or enable_conscious_spending %}
+<!-- Spending Breakdown Section -->
+<div class="row g-4 mt-2">
+    {% if enable_wants_needs and spending_summary.wants_needs %}
+    <!-- Wants vs Needs Breakdown -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-pie-chart-fill me-2"></i>Wants vs Needs
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for key, item in spending_summary.wants_needs.items %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>
+                            <span class="badge me-1" style="background-color: {{ item.color }}">
+                                {{ item.label }}
+                            </span>
+                        </span>
+                        <span class="text-muted small">
+                            ${{ item.amount|floatformat:0 }} ({{ item.percentage }}%)
+                        </span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar"
+                             role="progressbar"
+                             style="width: {{ item.percentage }}%; background-color: {{ item.color }}"></div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">No spending data</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if enable_conscious_spending and spending_summary.csp %}
+    <!-- Conscious Spending Plan Breakdown -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-wallet2 me-2"></i>Conscious Spending Plan
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for key, item in spending_summary.csp.items %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>
+                            <span class="badge me-1" style="background-color: {{ item.color }}">
+                                {{ item.label }}
+                            </span>
+                            {% if item.is_on_target %}
+                            <i class="bi bi-check-circle-fill text-success small"></i>
+                            {% else %}
+                            <i class="bi bi-exclamation-circle-fill text-warning small"></i>
+                            {% endif %}
+                        </span>
+                        <span class="text-muted small">
+                            ${{ item.amount|floatformat:0 }} ({{ item.percentage }}%)
+                            <span class="text-secondary">Target: {{ item.target_min }}-{{ item.target_max }}%</span>
+                        </span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar"
+                             role="progressbar"
+                             style="width: {% if item.percentage > 100 %}100{% else %}{{ item.percentage }}{% endif %}%; background-color: {{ item.color }}"></div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">No spending data</p>
+                {% endfor %}
+
+                {% if monthly_income %}
+                <hr>
+                <div class="d-flex justify-content-between text-muted small">
+                    <span>Total: ${{ spending_summary.total_spent|floatformat:0 }}</span>
+                    <span>Monthly Income: ${{ monthly_income|floatformat:0 }}</span>
+                </div>
+                {% else %}
+                <div class="alert alert-info small mt-3 mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <a href="{% url 'accounts:profile' %}">Set your monthly income</a> to see accurate CSP percentages.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
 <!-- Transactions for Selected Month -->
 <div class="row mt-4">
     <div class="col-12">

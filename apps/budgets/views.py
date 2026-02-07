@@ -48,7 +48,7 @@ def manage_categories(request):
 def create_category(request):
     """Create a new budget category."""
     if request.method == 'POST':
-        form = BudgetCategoryForm(request.POST)
+        form = BudgetCategoryForm(request.POST, user=request.user)
         if form.is_valid():
             category = form.save(commit=False)
             category.user = request.user
@@ -56,11 +56,12 @@ def create_category(request):
             messages.success(request, f'Category "{category.name}" created successfully.')
             return redirect('budgets:manage')
     else:
-        form = BudgetCategoryForm()
+        form = BudgetCategoryForm(user=request.user)
 
     return render(request, 'budgets/category_form.html', {
         'form': form,
-        'title': 'Create Category'
+        'title': 'Create Category',
+        'user': request.user,
     })
 
 
@@ -70,18 +71,19 @@ def edit_category(request, pk):
     category = get_object_or_404(BudgetCategory, pk=pk, user=request.user)
 
     if request.method == 'POST':
-        form = BudgetCategoryForm(request.POST, instance=category)
+        form = BudgetCategoryForm(request.POST, instance=category, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, f'Category "{category.name}" updated successfully.')
             return redirect('budgets:manage')
     else:
-        form = BudgetCategoryForm(instance=category)
+        form = BudgetCategoryForm(instance=category, user=request.user)
 
     return render(request, 'budgets/category_form.html', {
         'form': form,
         'category': category,
-        'title': 'Edit Category'
+        'title': 'Edit Category',
+        'user': request.user,
     })
 
 

@@ -2,6 +2,8 @@ import uuid
 from django.db import models
 from django.conf import settings
 
+from apps.budgets.models import SpendingType, CSPBucket
+
 
 class Transaction(models.Model):
     """Represents a single credit card transaction."""
@@ -39,6 +41,22 @@ class Transaction(models.Model):
     is_flagged = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
 
+    # Secondary categorization overrides (override category defaults)
+    spending_type_override = models.CharField(
+        max_length=10,
+        choices=SpendingType.choices,
+        null=True,
+        blank=True,
+        help_text="Override the category's default spending type"
+    )
+    csp_bucket_override = models.CharField(
+        max_length=15,
+        choices=CSPBucket.choices,
+        null=True,
+        blank=True,
+        help_text="Override the category's default CSP bucket"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -52,3 +70,35 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.date} - {self.description[:30]} - ${self.amount}"
+
+    @property
+    def spending_type(self):
+        """Return override if set, otherwise category default."""
+        if self.spending_type_override:
+            return self.spending_type_override
+        if self.category and self.category.default_spending_type:
+            return self.category.default_spending_type
+        return None
+
+    @property
+    def csp_bucket(self):
+        """Return override if set, otherwise category default."""
+        if self.csp_bucket_override:
+            return self.csp_bucket_override
+        if self.category and self.category.default_csp_bucket:
+            return self.category.default_csp_bucket
+        return None
+
+    def get_spending_type_display_effective(self):
+        """Get display label for effective spending type."""
+        value = self.spending_type
+        if value:
+            return SpendingType(value).label
+        return None
+
+    def get_csp_bucket_display_effective(self):
+        """Get display label for effective CSP bucket."""
+        value = self.csp_bucket
+        if value:
+            return CSPBucket(value).label
+        return None
