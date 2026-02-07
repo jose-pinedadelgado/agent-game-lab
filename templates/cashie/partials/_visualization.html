@@ -1,0 +1,67 @@
+{% load cashie_tags %}
+{% if visualization.type == 'table' %}
+    <!-- Table visualization -->
+    <div class="visualization-container">
+        <table class="table table-sm">
+            {% if visualization.title %}
+            <caption>{{ visualization.title }}</caption>
+            {% endif %}
+            <thead>
+                <tr>
+                    {% for header in visualization.data.headers %}
+                    <th>{{ header }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in visualization.data.rows %}
+                <tr>
+                    {% for cell in row %}
+                    <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <!-- Chart visualization (pie, bar, line) -->
+    <div class="visualization-container">
+        {% if visualization.title %}
+        <h6 class="text-center mb-3">{{ visualization.title }}</h6>
+        {% endif %}
+        <div style="max-width: 400px; margin: 0 auto;">
+            <canvas id="chart-{{ forloop.counter|default:'1' }}"></canvas>
+        </div>
+        <script>
+        (function() {
+            const chartData = {{ visualization|to_json }};
+            const canvas = document.getElementById('chart-{{ forloop.counter|default:'1' }}');
+            if (canvas && chartData) {
+                const ctx = canvas.getContext('2d');
+                const chartType = chartData.type === 'pie_chart' ? 'pie' : chartData.type === 'bar_chart' ? 'bar' : 'line';
+                new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: chartData.data.labels || [],
+                        datasets: [{
+                            data: chartData.data.values || [],
+                            backgroundColor: chartData.data.colors || chartData.data.color || '#10B981',
+                            borderWidth: chartType === 'pie' ? 0 : 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: chartType === 'pie'
+                            }
+                        }
+                    }
+                });
+            }
+        })();
+        </script>
+    </div>
+{% endif %}

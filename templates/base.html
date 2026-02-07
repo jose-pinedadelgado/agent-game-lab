@@ -182,6 +182,10 @@
                        href="{% url 'advisor:insights' %}">
                         <i class="bi bi-lightbulb"></i> Insights
                     </a>
+                    <a class="nav-link {% if 'cashie' in request.path %}active{% endif %}"
+                       href="{% url 'cashie:chat' %}">
+                        <i class="bi bi-chat-dots"></i> Ask Cashie
+                    </a>
                 </nav>
             </div>
             {% endif %}

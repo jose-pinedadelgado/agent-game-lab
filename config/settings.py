@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.analytics',
     'apps.advisor',
     'apps.categorization',
+    'apps.cashie',
 ]
 
 MIDDLEWARE = [

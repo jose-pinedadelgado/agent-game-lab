@@ -1,0 +1,12 @@
+{% if questions %}
+<div class="follow-up-suggestions">
+    <small class="text-muted d-block mb-2">You might also ask:</small>
+    <div class="suggestion-chips" style="justify-content: flex-start;">
+        {% for question in questions %}
+        <span class="suggestion-chip" onclick="sendSuggestion('{{ question|escapejs }}')">
+            {{ question }}
+        </span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

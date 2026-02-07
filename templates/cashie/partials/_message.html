@@ -1,0 +1,19 @@
+<div class="message message-{{ message.role }}">
+    <div class="message-bubble">
+        {{ message.content|linebreaks }}
+
+        {% if message.visualization_data %}
+            {% include 'cashie/partials/_visualization.html' with visualization=message.visualization_data %}
+        {% endif %}
+    </div>
+    <div class="message-time">
+        {{ message.created_at|time:"g:i A" }}
+        {% if message.processing_time_ms %}
+        <span class="text-muted">({{ message.processing_time_ms }}ms)</span>
+        {% endif %}
+    </div>
+
+    {% if message.suggested_questions %}
+        {% include 'cashie/partials/_suggested_questions.html' with questions=message.suggested_questions %}
+    {% endif %}
+</div>

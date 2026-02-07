@@ -1,0 +1,30 @@
+<!-- User message -->
+<div class="message message-user">
+    <div class="message-bubble">
+        {{ user_message.content|linebreaks }}
+    </div>
+    <div class="message-time">
+        {{ user_message.created_at|time:"g:i A" }}
+    </div>
+</div>
+
+<!-- Assistant message -->
+<div class="message message-assistant">
+    <div class="message-bubble">
+        {{ assistant_message.content|linebreaks }}
+
+        {% if assistant_message.visualization_data %}
+            {% include 'cashie/partials/_visualization.html' with visualization=assistant_message.visualization_data %}
+        {% endif %}
+    </div>
+    <div class="message-time">
+        {{ assistant_message.created_at|time:"g:i A" }}
+        {% if assistant_message.processing_time_ms %}
+        <span class="text-muted">({{ assistant_message.processing_time_ms }}ms)</span>
+        {% endif %}
+    </div>
+
+    {% if assistant_message.suggested_questions %}
+        {% include 'cashie/partials/_suggested_questions.html' with questions=assistant_message.suggested_questions %}
+    {% endif %}
+</div>

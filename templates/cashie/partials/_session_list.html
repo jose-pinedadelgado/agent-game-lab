@@ -1,0 +1,10 @@
+{% for s in sessions %}
+<a href="{% url 'cashie:session' session_id=s.id %}"
+   class="session-item {% if s.id == session.id %}active{% endif %}">
+    <i class="bi bi-chat me-2"></i>{{ s.title }}
+</a>
+{% empty %}
+<div class="text-muted text-center py-3">
+    No previous chats
+</div>
+{% endfor %}
