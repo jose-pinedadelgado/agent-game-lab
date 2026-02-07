@@ -47,6 +47,10 @@ class LLMAgent:
             self._provider = provider
         elif config.provider == "mock":
             self._provider = MockProvider(config=config.mock)
+        elif config.provider == "openai":
+            from pdbench.agents.providers.openai import OpenAIProvider
+
+            self._provider = OpenAIProvider(model=config.model)
         else:
             raise ValueError(f"Unsupported provider: {config.provider}")
 
