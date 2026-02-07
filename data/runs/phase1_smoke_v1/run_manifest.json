@@ -1,6 +1,6 @@
 {
   "run_id": "phase1_smoke_v1",
-  "config_hash": "51074de14c96a951",
+  "config_hash": "40e67dcd153744ba",
   "config_snapshot": {
     "run": {
       "run_id": "phase1_smoke_v1",
@@ -86,6 +86,84 @@
               "policy": "WSLS"
             }
           }
+        },
+        {
+          "name": "CrewAI_strategist_vs_TFT",
+          "agent_a": {
+            "ref": "agents/crewai_base.yaml",
+            "overrides": {
+              "agent_key": "strategic_cooperator"
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "TFT"
+            }
+          }
+        },
+        {
+          "name": "CrewAI_ruthless_vs_ALLD",
+          "agent_a": {
+            "ref": "agents/crewai_base.yaml",
+            "overrides": {
+              "agent_key": "ruthless_optimizer"
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "ALLD"
+            }
+          }
+        },
+        {
+          "name": "CrewAI_diplomat_vs_TFT",
+          "agent_a": {
+            "ref": "agents/crewai_base.yaml",
+            "overrides": {
+              "agent_key": "adaptive_diplomat",
+              "temperature": 0.7
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "TFT"
+            }
+          }
+        },
+        {
+          "name": "CrewAI_diplomat_vs_GRIM",
+          "agent_a": {
+            "ref": "agents/crewai_base.yaml",
+            "overrides": {
+              "agent_key": "adaptive_diplomat",
+              "temperature": 0.7
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "GRIM"
+            }
+          }
+        },
+        {
+          "name": "CrewAI_diplomat_vs_ALLD_hot",
+          "agent_a": {
+            "ref": "agents/crewai_base.yaml",
+            "overrides": {
+              "agent_key": "adaptive_diplomat",
+              "temperature": 1.2
+            }
+          },
+          "agent_b": {
+            "ref": "agents/policies.yaml",
+            "overrides": {
+              "policy": "ALLD"
+            }
+          }
         }
       ]
     },
@@ -107,6 +185,6 @@
   "environment": {
     "python_version": "3.12.10",
     "platform": "Windows-11-10.0.26200-SP0",
-    "timestamp_utc": "2026-01-27T21:30:28.166555+00:00"
+    "timestamp_utc": "2026-02-07T10:33:59.394965+00:00"
   }
 }

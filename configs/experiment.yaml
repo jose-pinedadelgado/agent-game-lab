@@ -73,6 +73,39 @@ experiment:
         overrides:
           policy: "ALLD"
 
+    - name: "CrewAI_diplomat_vs_TFT"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides:
+          agent_key: "adaptive_diplomat"
+          temperature: 0.7
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides:
+          policy: "TFT"
+
+    - name: "CrewAI_diplomat_vs_GRIM"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides:
+          agent_key: "adaptive_diplomat"
+          temperature: 0.7
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides:
+          policy: "GRIM"
+
+    - name: "CrewAI_diplomat_vs_ALLD_hot"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides:
+          agent_key: "adaptive_diplomat"
+          temperature: 1.2
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides:
+          policy: "ALLD"
+
 metrics:
   collapse:
     k: 10
