@@ -1,0 +1,37 @@
+{% extends 'budgets/base_budget.html' %}
+
+{% block title %}Delete Goal - Bamboo Money{% endblock %}
+
+{% block tab_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Delete Savings Goal
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete <strong>"{{ goal.name }}"</strong>?</p>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle me-2"></i>
+                    This will permanently delete the goal and all associated contribution history.
+                    <br>
+                    Current amount saved: <strong>${{ goal.current_amount|floatformat:2 }}</strong>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </button>
+                        <a href="{% url 'budgets:savings' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

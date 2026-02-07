@@ -1,0 +1,137 @@
+{% extends 'budgets/base_budget.html' %}
+
+{% block title %}{{ title }} - Savings & Investments - Bamboo Money{% endblock %}
+
+{% block tab_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Goal Name</label>
+                        {{ form.name }}
+                        <div class="form-text">e.g., Emergency Fund, Vacation 2025, House Down Payment</div>
+                        {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_goal_type" class="form-label">Goal Type</label>
+                            {{ form.goal_type }}
+                            {% if form.goal_type.errors %}
+                            <div class="text-danger small mt-1">{{ form.goal_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_color" class="form-label">Color</label>
+                            <div class="d-flex align-items-center">
+                                {{ form.color }}
+                                <span class="ms-2 badge" id="colorPreview" style="background-color: {{ form.color.value|default:'#10B981' }}">
+                                    Preview
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_target_amount" class="form-label">Target Amount ($)</label>
+                            {{ form.target_amount }}
+                            <div class="form-text">How much do you want to save?</div>
+                            {% if form.target_amount.errors %}
+                            <div class="text-danger small mt-1">{{ form.target_amount.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_current_amount" class="form-label">Current Amount ($)</label>
+                            {{ form.current_amount }}
+                            <div class="form-text">How much have you saved so far?</div>
+                            {% if form.current_amount.errors %}
+                            <div class="text-danger small mt-1">{{ form.current_amount.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_target_date" class="form-label">Target Date (Optional)</label>
+                            {{ form.target_date }}
+                            <div class="form-text">When do you want to reach this goal?</div>
+                            {% if form.target_date.errors %}
+                            <div class="text-danger small mt-1">{{ form.target_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_monthly_contribution" class="form-label">Monthly Contribution ($)</label>
+                            {{ form.monthly_contribution }}
+                            <div class="form-text">Planned monthly savings</div>
+                            {% if form.monthly_contribution.errors %}
+                            <div class="text-danger small mt-1">{{ form.monthly_contribution.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Retirement Options -->
+                    <div class="mb-3 p-3 bg-light rounded">
+                        <div class="form-check mb-2">
+                            {{ form.is_retirement }}
+                            <label class="form-check-label" for="id_is_retirement">
+                                {{ form.is_retirement.label }}
+                            </label>
+                            <div class="form-text">Check if this is a 401(k), IRA, or similar retirement account</div>
+                        </div>
+
+                        <div class="mt-2" id="employerMatchField">
+                            <label for="id_employer_match_percent" class="form-label">{{ form.employer_match_percent.label }}</label>
+                            {{ form.employer_match_percent }}
+                            <div class="form-text">If your employer matches contributions, enter the percentage</div>
+                            {% if form.employer_match_percent.errors %}
+                            <div class="text-danger small mt-1">{{ form.employer_match_percent.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_linked_account" class="form-label">Link to Account (Optional)</label>
+                        {{ form.linked_account }}
+                        <div class="form-text">Link this goal to a savings or investment account</div>
+                        {% if form.linked_account.errors %}
+                        <div class="text-danger small mt-1">{{ form.linked_account.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Save
+                        </button>
+                        <a href="{% url 'budgets:savings' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('id_color').addEventListener('input', function(e) {
+    document.getElementById('colorPreview').style.backgroundColor = e.target.value;
+});
+
+// Toggle employer match field visibility based on is_retirement checkbox
+function toggleEmployerMatchField() {
+    const isRetirement = document.getElementById('id_is_retirement').checked;
+    document.getElementById('employerMatchField').style.display = isRetirement ? 'block' : 'none';
+}
+
+document.getElementById('id_is_retirement').addEventListener('change', toggleEmployerMatchField);
+toggleEmployerMatchField(); // Initial state
+</script>
+{% endblock %}

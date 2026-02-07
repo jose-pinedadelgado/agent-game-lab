@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Budgets - Bamboo Money{% endblock %}
+
+{% block extra_css %}
+<style>
+    .budget-tabs .nav-link {
+        color: #475569;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+    }
+    .budget-tabs .nav-link:hover {
+        color: #10B981;
+        border-bottom-color: #d1fae5;
+    }
+    .budget-tabs .nav-link.active {
+        color: #10B981;
+        background-color: transparent;
+        border-bottom-color: #10B981;
+    }
+    .budget-tabs .nav-link i {
+        margin-right: 0.5rem;
+    }
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .section-header h5 {
+        margin: 0;
+        color: #1e293b;
+        font-weight: 600;
+    }
+    .budget-summary-card {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+    }
+    .budget-summary-card .summary-value {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    .budget-summary-card .summary-label {
+        opacity: 0.9;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 mb-1">Budgets</h1>
+    <p class="text-muted mb-0">Manage your expenses, debts, and savings goals</p>
+</div>
+
+<!-- Tab Navigation -->
+<ul class="nav budget-tabs border-bottom mb-4">
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'expenses' %}active{% endif %}"
+           href="{% url 'budgets:expenses' %}">
+            <i class="bi bi-cash-stack"></i>Expenses
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'debt' %}active{% endif %}"
+           href="{% url 'budgets:debt' %}">
+            <i class="bi bi-credit-card-2-back"></i>Debt Payoff
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'savings' %}active{% endif %}"
+           href="{% url 'budgets:savings' %}">
+            <i class="bi bi-piggy-bank"></i>Savings & Investments
+        </a>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+{% block tab_content %}{% endblock %}
+{% endblock %}

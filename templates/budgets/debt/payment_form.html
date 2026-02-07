@@ -1,0 +1,72 @@
+{% extends 'budgets/base_budget.html' %}
+
+{% block title %}Record Payment - {{ debt.name }} - Bamboo Money{% endblock %}
+
+{% block tab_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Record Payment</h5>
+                <p class="text-muted mb-0 small">{{ debt.name }}</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex justify-content-between">
+                        <span>Current Balance:</span>
+                        <strong>${{ debt.current_balance|floatformat:2 }}</strong>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_amount" class="form-label">Payment Amount ($)</label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                        <div class="text-danger small mt-1">{{ form.amount.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text">
+                            Suggested: ${{ debt.total_monthly_payment|floatformat:2 }}
+                            (min ${{ debt.minimum_payment|floatformat:2 }} + extra ${{ debt.extra_payment|floatformat:2 }})
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_payment_date" class="form-label">Payment Date</label>
+                        {{ form.payment_date }}
+                        {% if form.payment_date.errors %}
+                        <div class="text-danger small mt-1">{{ form.payment_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_linked_transaction" class="form-label">Link to Transaction (Optional)</label>
+                        {{ form.linked_transaction }}
+                        <div class="form-text">Link this payment to an existing transaction for tracking</div>
+                        {% if form.linked_transaction.errors %}
+                        <div class="text-danger small mt-1">{{ form.linked_transaction.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_notes" class="form-label">Notes (Optional)</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-lg me-1"></i>Record Payment
+                        </button>
+                        <a href="{% url 'budgets:debt_detail' debt.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+<div class="card h-100">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <span class="badge mb-2" style="background-color: {{ debt.color }}">
+                    {{ debt.name }}
+                </span>
+                {% if debt.linked_account %}
+                <span class="badge bg-secondary ms-1" title="Linked to {{ debt.linked_account.name }}">
+                    <i class="bi bi-link-45deg"></i>
+                </span>
+                {% endif %}
+                <h4 class="mb-0">${{ debt.current_balance|floatformat:0 }}</h4>
+                <small class="text-muted">
+                    of ${{ debt.original_balance|floatformat:0 }} original
+                    <span class="ms-2 badge bg-light text-dark">{{ debt.interest_rate|floatformat:1 }}% APR</span>
+                </small>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{% url 'budgets:debt_detail' debt.pk %}">
+                        <i class="bi bi-eye me-2"></i>View Details
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'budgets:debt_payment' debt.pk %}">
+                        <i class="bi bi-plus-circle me-2"></i>Record Payment
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'budgets:edit_debt' debt.pk %}">
+                        <i class="bi bi-pencil me-2"></i>Edit
+                    </a></li>
+                    <li><a class="dropdown-item text-danger" href="{% url 'budgets:delete_debt' debt.pk %}">
+                        <i class="bi bi-trash me-2"></i>Delete
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress mb-2" style="height: 10px;">
+            <div class="progress-bar bg-success"
+                 role="progressbar"
+                 style="width: {{ debt.payoff_percentage|floatformat:0 }}%"
+                 title="{{ debt.payoff_percentage|floatformat:0 }}% paid off"></div>
+        </div>
+
+        <div class="d-flex justify-content-between small mb-3">
+            <span class="text-success">
+                {{ debt.payoff_percentage|floatformat:0 }}% paid off
+            </span>
+            <span class="text-muted">
+                ${{ debt.paid_off_amount|floatformat:0 }} paid
+            </span>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="row text-center border-top pt-3">
+            <div class="col-6 border-end">
+                <div class="text-muted small">Minimum</div>
+                <div class="fw-bold">${{ debt.minimum_payment|floatformat:0 }}/mo</div>
+            </div>
+            <div class="col-6">
+                <div class="text-muted small">Extra</div>
+                <div class="fw-bold text-primary">
+                    {% if debt.extra_payment > 0 %}
+                    +${{ debt.extra_payment|floatformat:0 }}/mo
+                    {% else %}
+                    $0
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if debt.target_payoff_date %}
+        <div class="text-center mt-2 small text-muted">
+            <i class="bi bi-calendar3 me-1"></i>
+            Target: {{ debt.target_payoff_date|date:"M Y" }}
+        </div>
+        {% endif %}
+    </div>
+</div>

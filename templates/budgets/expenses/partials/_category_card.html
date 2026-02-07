@@ -1,0 +1,54 @@
+<div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <span class="badge mb-2" style="background-color: {{ item.category.color }}">
+                        {{ item.category.name }}
+                    </span>
+                    {% if item.category.is_recurring and item.category.due_day %}
+                    <span class="badge bg-secondary ms-1" title="Due day {{ item.category.due_day }}">
+                        <i class="bi bi-calendar3"></i> {{ item.category.due_day }}
+                    </span>
+                    {% endif %}
+                    <h4 class="mb-0">${{ item.spent|floatformat:0 }}</h4>
+                    <small class="text-muted">of ${{ item.category.monthly_limit|floatformat:0 }} budget</small>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'budgets:edit_category' item.category.pk %}">
+                            <i class="bi bi-pencil me-2"></i>Edit
+                        </a></li>
+                        {% if item.category.name != 'Other' %}
+                        <li><a class="dropdown-item text-danger" href="{% url 'budgets:delete_category' item.category.pk %}">
+                            <i class="bi bi-trash me-2"></i>Delete
+                        </a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="progress mb-2" style="height: 10px;">
+                <div class="progress-bar bg-{{ item.status_class }}"
+                     role="progressbar"
+                     style="width: {{ item.percentage }}%"></div>
+            </div>
+
+            <div class="d-flex justify-content-between small">
+                <span class="{% if item.over_budget %}text-danger{% else %}text-muted{% endif %}">
+                    {{ item.percentage|floatformat:0 }}% used
+                </span>
+                <span class="{% if item.remaining < 0 %}text-danger{% else %}text-success{% endif %}">
+                    {% if item.remaining >= 0 %}
+                    ${{ item.remaining|floatformat:0 }} left
+                    {% else %}
+                    ${{ item.remaining|floatformat:0|slice:"1:" }} over
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,6 +3,12 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+class DebtPayoffStrategy(models.TextChoices):
+    """Strategy for paying off multiple debts."""
+    AVALANCHE = 'avalanche', 'Avalanche (Highest Interest First)'
+    SNOWBALL = 'snowball', 'Snowball (Smallest Balance First)'
+
+
 class User(AbstractUser):
     """Custom user model with UUID primary key and email as username."""
 
@@ -23,6 +29,14 @@ class User(AbstractUser):
     enable_conscious_spending = models.BooleanField(
         default=False,
         help_text="Enable Conscious Spending Plan tracking"
+    )
+
+    # Debt payoff preferences
+    debt_payoff_strategy = models.CharField(
+        max_length=10,
+        choices=DebtPayoffStrategy.choices,
+        default=DebtPayoffStrategy.AVALANCHE,
+        help_text="Strategy for ordering debt payoff"
     )
 
     USERNAME_FIELD = 'email'

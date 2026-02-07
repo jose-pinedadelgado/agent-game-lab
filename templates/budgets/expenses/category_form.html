@@ -1,0 +1,132 @@
+{% extends 'budgets/base_budget.html' %}
+
+{% block title %}{{ title }} - Budgets - Bamboo Money{% endblock %}
+
+{% block tab_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Category Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_monthly_limit" class="form-label">Monthly Budget Limit ($)</label>
+                        {{ form.monthly_limit }}
+                        {% if form.monthly_limit.errors %}
+                        <div class="text-danger small mt-1">{{ form.monthly_limit.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_section" class="form-label">Expense Type</label>
+                            {{ form.section }}
+                            <div class="form-text">Fixed expenses are recurring bills; variable expenses change month to month.</div>
+                            {% if form.section.errors %}
+                            <div class="text-danger small mt-1">{{ form.section.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_color" class="form-label">Color</label>
+                            <div class="d-flex align-items-center">
+                                {{ form.color }}
+                                <span class="ms-2 badge" id="colorPreview" style="background-color: {{ form.color.value|default:'#3B82F6' }}">
+                                    Preview
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recurring bill options (for fixed expenses) -->
+                    <div class="mb-3 p-3 bg-light rounded" id="recurringOptions">
+                        <div class="form-check mb-2">
+                            {{ form.is_recurring }}
+                            <label class="form-check-label" for="id_is_recurring">
+                                {{ form.is_recurring.label }}
+                            </label>
+                            <div class="form-text">Check if this is a bill with a regular due date</div>
+                        </div>
+
+                        <div class="mt-2" id="dueDayField">
+                            <label for="id_due_day" class="form-label">{{ form.due_day.label }}</label>
+                            {{ form.due_day }}
+                            <div class="form-text">Enter 1-31 for the day of month the bill is due</div>
+                            {% if form.due_day.errors %}
+                            <div class="text-danger small mt-1">{{ form.due_day.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if user.enable_wants_needs or user.enable_conscious_spending %}
+                    <hr>
+                    <h6 class="text-muted mb-3">Secondary Categorization Defaults</h6>
+                    <p class="text-muted small mb-3">
+                        Set defaults for transactions in this category. Individual transactions can override these.
+                    </p>
+                    {% endif %}
+
+                    {% if user.enable_wants_needs %}
+                    <div class="mb-3">
+                        <label for="id_default_spending_type" class="form-label">{{ form.default_spending_type.label }}</label>
+                        {{ form.default_spending_type }}
+                        <div class="form-text">Classifies spending as Need, Want, or Savings</div>
+                        {% if form.default_spending_type.errors %}
+                        <div class="text-danger small mt-1">{{ form.default_spending_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    {{ form.default_spending_type }}
+                    {% endif %}
+
+                    {% if user.enable_conscious_spending %}
+                    <div class="mb-3">
+                        <label for="id_default_csp_bucket" class="form-label">{{ form.default_csp_bucket.label }}</label>
+                        {{ form.default_csp_bucket }}
+                        <div class="form-text">Conscious Spending Plan bucket (Fixed, Investments, Savings, Guilt-Free)</div>
+                        {% if form.default_csp_bucket.errors %}
+                        <div class="text-danger small mt-1">{{ form.default_csp_bucket.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    {{ form.default_csp_bucket }}
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Save
+                        </button>
+                        <a href="{% url 'budgets:expenses' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('id_color').addEventListener('input', function(e) {
+    document.getElementById('colorPreview').style.backgroundColor = e.target.value;
+});
+
+// Toggle due day field visibility based on is_recurring checkbox
+function toggleDueDayField() {
+    const isRecurring = document.getElementById('id_is_recurring').checked;
+    document.getElementById('dueDayField').style.display = isRecurring ? 'block' : 'none';
+}
+
+document.getElementById('id_is_recurring').addEventListener('change', toggleDueDayField);
+toggleDueDayField(); // Initial state
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'budgets/base_budget.html' %}
+
+{% block title %}Expenses - Budgets - Bamboo Money{% endblock %}
+
+{% block tab_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <span class="text-muted">{{ month_name }}</span>
+    </div>
+    <a href="{% url 'budgets:create_category' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Add Category
+    </a>
+</div>
+
+<!-- Fixed Expenses Section -->
+<div class="mb-5">
+    <div class="section-header">
+        <h5><i class="bi bi-pin-angle me-2 text-muted"></i>Fixed Expenses</h5>
+        <span class="badge bg-light text-dark">
+            ${{ fixed_total|floatformat:0 }} / month
+        </span>
+    </div>
+
+    <div class="row g-4">
+        {% for item in fixed_categories %}
+        {% include 'budgets/expenses/partials/_category_card.html' %}
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-4 bg-light rounded">
+                <i class="bi bi-pin-angle fs-4 text-muted"></i>
+                <p class="mb-0 mt-2 text-muted">No fixed expenses yet</p>
+                <p class="small text-muted">Fixed expenses are recurring bills like rent, utilities, and subscriptions.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Variable Expenses Section -->
+<div class="mb-4">
+    <div class="section-header">
+        <h5><i class="bi bi-shuffle me-2 text-muted"></i>Variable Expenses</h5>
+        <span class="badge bg-light text-dark">
+            ${{ variable_total|floatformat:0 }} / month
+        </span>
+    </div>
+
+    <div class="row g-4">
+        {% for item in variable_categories %}
+        {% include 'budgets/expenses/partials/_category_card.html' %}
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-4 bg-light rounded">
+                <i class="bi bi-shuffle fs-4 text-muted"></i>
+                <p class="mb-0 mt-2 text-muted">No variable expenses yet</p>
+                <p class="small text-muted">Variable expenses change month to month like groceries, dining, and entertainment.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Summary -->
+{% if fixed_categories or variable_categories %}
+<div class="card mt-4">
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="text-muted small">Total Budget</div>
+                <div class="h4 mb-0">${{ total_budget|floatformat:0 }}</div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-muted small">Total Spent</div>
+                <div class="h4 mb-0 {% if total_spent > total_budget %}text-danger{% endif %}">
+                    ${{ total_spent|floatformat:0 }}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-muted small">Remaining</div>
+                <div class="h4 mb-0 {% if total_remaining < 0 %}text-danger{% else %}text-success{% endif %}">
+                    {% if total_remaining >= 0 %}
+                    ${{ total_remaining|floatformat:0 }}
+                    {% else %}
+                    -${{ total_remaining|floatformat:0|slice:"1:" }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

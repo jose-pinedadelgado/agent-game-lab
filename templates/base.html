@@ -179,8 +179,8 @@
                         <i class="bi bi-wallet2"></i> Accounts
                     </a>
                     <a class="nav-link {% if 'budgets' in request.path and 'alerts' not in request.path %}active{% endif %}"
-                       href="{% url 'budgets:manage' %}">
-                        <i class="bi bi-wallet2"></i> Budgets
+                       href="{% url 'budgets:expenses' %}">
+                        <i class="bi bi-pie-chart"></i> Budgets
                     </a>
                     <a class="nav-link {% if 'advisor' in request.path %}active{% endif %}"
                        href="{% url 'advisor:insights' %}">

@@ -1,0 +1,117 @@
+{% extends 'budgets/base_budget.html' %}
+
+{% block title %}{{ title }} - Debt Payoff - Bamboo Money{% endblock %}
+
+{% block tab_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Debt Name</label>
+                        {{ form.name }}
+                        <div class="form-text">e.g., Chase Visa, Car Loan, Student Loans</div>
+                        {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_original_balance" class="form-label">Original Balance ($)</label>
+                            {{ form.original_balance }}
+                            <div class="form-text">Balance when you started tracking</div>
+                            {% if form.original_balance.errors %}
+                            <div class="text-danger small mt-1">{{ form.original_balance.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_current_balance" class="form-label">Current Balance ($)</label>
+                            {{ form.current_balance }}
+                            {% if form.current_balance.errors %}
+                            <div class="text-danger small mt-1">{{ form.current_balance.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_interest_rate" class="form-label">Interest Rate (APR %)</label>
+                        {{ form.interest_rate }}
+                        <div class="form-text">Annual percentage rate (e.g., 19.99 for 19.99%)</div>
+                        {% if form.interest_rate.errors %}
+                        <div class="text-danger small mt-1">{{ form.interest_rate.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_minimum_payment" class="form-label">Minimum Payment ($)</label>
+                            {{ form.minimum_payment }}
+                            <div class="form-text">Required monthly payment</div>
+                            {% if form.minimum_payment.errors %}
+                            <div class="text-danger small mt-1">{{ form.minimum_payment.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_extra_payment" class="form-label">Extra Payment ($)</label>
+                            {{ form.extra_payment }}
+                            <div class="form-text">Additional monthly payment (optional)</div>
+                            {% if form.extra_payment.errors %}
+                            <div class="text-danger small mt-1">{{ form.extra_payment.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_target_payoff_date" class="form-label">Target Payoff Date</label>
+                            {{ form.target_payoff_date }}
+                            <div class="form-text">Your goal to be debt-free (optional)</div>
+                            {% if form.target_payoff_date.errors %}
+                            <div class="text-danger small mt-1">{{ form.target_payoff_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_color" class="form-label">Color</label>
+                            <div class="d-flex align-items-center">
+                                {{ form.color }}
+                                <span class="ms-2 badge" id="colorPreview" style="background-color: {{ form.color.value|default:'#EF4444' }}">
+                                    Preview
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_linked_account" class="form-label">Link to Account (Optional)</label>
+                        {{ form.linked_account }}
+                        <div class="form-text">Link this debt to a credit card or loan account for automatic balance sync</div>
+                        {% if form.linked_account.errors %}
+                        <div class="text-danger small mt-1">{{ form.linked_account.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Save
+                        </button>
+                        <a href="{% url 'budgets:debt' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('id_color').addEventListener('input', function(e) {
+    document.getElementById('colorPreview').style.backgroundColor = e.target.value;
+});
+</script>
+{% endblock %}

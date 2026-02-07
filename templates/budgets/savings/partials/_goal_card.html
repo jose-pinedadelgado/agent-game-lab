@@ -1,0 +1,95 @@
+<div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <span class="badge mb-2" style="background-color: {{ goal.color }}">
+                        {{ goal.name }}
+                    </span>
+                    {% if goal.is_retirement %}
+                    <span class="badge bg-warning text-dark ms-1" title="Retirement Account">
+                        <i class="bi bi-sun"></i>
+                    </span>
+                    {% endif %}
+                    {% if goal.linked_account %}
+                    <span class="badge bg-secondary ms-1" title="Linked to {{ goal.linked_account.name }}">
+                        <i class="bi bi-link-45deg"></i>
+                    </span>
+                    {% endif %}
+                    <h4 class="mb-0">${{ goal.current_amount|floatformat:0 }}</h4>
+                    <small class="text-muted">
+                        of ${{ goal.target_amount|floatformat:0 }} goal
+                    </small>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'budgets:goal_detail' goal.pk %}">
+                            <i class="bi bi-eye me-2"></i>View Details
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'budgets:contribute' goal.pk %}">
+                            <i class="bi bi-plus-circle me-2"></i>Add Contribution
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'budgets:edit_goal' goal.pk %}">
+                            <i class="bi bi-pencil me-2"></i>Edit
+                        </a></li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'budgets:delete_goal' goal.pk %}">
+                            <i class="bi bi-trash me-2"></i>Delete
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress mb-2" style="height: 10px;">
+                <div class="progress-bar bg-success"
+                     role="progressbar"
+                     style="width: {{ goal.progress_percentage|floatformat:0 }}%"
+                     title="{{ goal.progress_percentage|floatformat:0 }}% complete"></div>
+            </div>
+
+            <div class="d-flex justify-content-between small mb-3">
+                <span class="{% if goal.is_complete %}text-success{% else %}text-muted{% endif %}">
+                    {% if goal.is_complete %}
+                    <i class="bi bi-check-circle-fill me-1"></i>Goal reached!
+                    {% else %}
+                    {{ goal.progress_percentage|floatformat:0 }}% complete
+                    {% endif %}
+                </span>
+                <span class="text-muted">
+                    ${{ goal.remaining_amount|floatformat:0 }} to go
+                </span>
+            </div>
+
+            <!-- Monthly Contribution -->
+            <div class="border-top pt-3">
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Monthly contribution:</span>
+                    <span class="fw-bold">
+                        {% if goal.monthly_contribution > 0 %}
+                        ${{ goal.monthly_contribution|floatformat:0 }}/mo
+                        {% else %}
+                        Not set
+                        {% endif %}
+                    </span>
+                </div>
+                {% if goal.employer_match_percent %}
+                <div class="d-flex justify-content-between small mt-1">
+                    <span class="text-muted">Employer match:</span>
+                    <span class="fw-bold text-success">{{ goal.employer_match_percent|floatformat:0 }}%</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if goal.target_date %}
+            <div class="text-center mt-2 small text-muted">
+                <i class="bi bi-calendar3 me-1"></i>
+                Target: {{ goal.target_date|date:"M Y" }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
