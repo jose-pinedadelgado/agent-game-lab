@@ -34,6 +34,10 @@ from pdbench.storage.aggregate import load_aggregates
 
 POLICY_AGENTS = ["ALLC", "ALLD", "TFT", "GRIM", "GTFT", "WSLS"]
 
+CREWAI_AGENTS = ["strategic_cooperator", "ruthless_optimizer", "adaptive_diplomat"]
+
+ALL_AGENTS = POLICY_AGENTS + ["MockLLM"] + CREWAI_AGENTS
+
 AGENT_DESCRIPTIONS = {
     "ALLC": ("Always Cooperate", "🕊️", "Always plays C. Naive but hopeful."),
     "ALLD": ("Always Defect", "😈", "Always plays D. Pure exploitation."),
@@ -42,6 +46,9 @@ AGENT_DESCRIPTIONS = {
     "GTFT": ("Generous TFT", "😇", "Like TFT, but sometimes forgives."),
     "WSLS": ("Win-Stay Lose-Shift", "🎰", "Repeats action if it worked, switches if not."),
     "MockLLM": ("Mock LLM", "🤖", "Simulated LLM agent (always cooperates)."),
+    "strategic_cooperator": ("Strategic Cooperator", "🧠", "CrewAI LLM focused on mutual benefit."),
+    "ruthless_optimizer": ("Ruthless Optimizer", "🦈", "CrewAI LLM focused on self-interest."),
+    "adaptive_diplomat": ("Adaptive Diplomat", "🕊️", "CrewAI LLM that reads opponent behavior."),
 }
 
 ACTION_COLORS = {"C": "#4CAF50", "D": "#F44336"}  # Green for cooperate, red for defect
@@ -67,6 +74,19 @@ def load_run_data(run_dir: Path) -> tuple[dict, list[dict], pd.DataFrame]:
     rounds = load_rounds_jsonl(run_dir / "rounds.jsonl")
     aggregates = load_aggregates(run_dir)
     return manifest, rounds, aggregates
+
+
+def build_agent_ref(agent_name: str) -> AgentRef:
+    """Build an AgentRef for a given agent name."""
+    if agent_name in CREWAI_AGENTS:
+        return AgentRef(
+            ref="agents/crewai_base.yaml",
+            overrides={"agent_key": agent_name},
+        )
+    elif agent_name == "MockLLM":
+        return AgentRef(ref="agents/llm_default.yaml", overrides={})
+    else:
+        return AgentRef(ref="agents/policies.yaml", overrides={"policy": agent_name})
 
 
 def get_project_root() -> Path:
@@ -200,7 +220,7 @@ def render_run_experiment_tab() -> None:
         st.subheader("Agent A")
         agent_a_type = st.selectbox(
             "Strategy",
-            POLICY_AGENTS + ["MockLLM"],
+            ALL_AGENTS,
             key="agent_a",
             help="Select the strategy for Agent A"
         )
@@ -210,7 +230,7 @@ def render_run_experiment_tab() -> None:
         st.subheader("Agent B")
         agent_b_type = st.selectbox(
             "Strategy",
-            POLICY_AGENTS + ["MockLLM"],
+            ALL_AGENTS,
             index=1,  # Default to ALLD
             key="agent_b",
             help="Select the strategy for Agent B"
@@ -307,14 +327,8 @@ def render_run_experiment_tab() -> None:
                         conditions=[
                             ConditionConfig(
                                 name=f"{agent_a_type}_vs_{agent_b_type}",
-                                agent_a=AgentRef(
-                                    ref="agents/llm_default.yaml" if agent_a_type == "MockLLM" else "agents/policies.yaml",
-                                    overrides={"policy": agent_a_type} if agent_a_type != "MockLLM" else {},
-                                ),
-                                agent_b=AgentRef(
-                                    ref="agents/llm_default.yaml" if agent_b_type == "MockLLM" else "agents/policies.yaml",
-                                    overrides={"policy": agent_b_type} if agent_b_type != "MockLLM" else {},
-                                ),
+                                agent_a=build_agent_ref(agent_a_type),
+                                agent_b=build_agent_ref(agent_b_type),
                             ),
                         ],
                     ),
@@ -660,7 +674,7 @@ def render_tournament_tab() -> None:
     # Strategy selection
     selected_strategies = st.multiselect(
         "Select Strategies",
-        POLICY_AGENTS,
+        ALL_AGENTS,
         default=["ALLC", "ALLD", "TFT", "GRIM"],
         help="Choose which strategies to include in the tournament"
     )
@@ -685,8 +699,8 @@ def render_tournament_tab() -> None:
                 conditions.append(
                     ConditionConfig(
                         name=f"{a}_vs_{b}",
-                        agent_a=AgentRef(ref="agents/policies.yaml", overrides={"policy": a}),
-                        agent_b=AgentRef(ref="agents/policies.yaml", overrides={"policy": b}),
+                        agent_a=build_agent_ref(a),
+                        agent_b=build_agent_ref(b),
                     )
                 )
 
@@ -734,7 +748,7 @@ def render_tournament_tab() -> None:
                 # Display leaderboard
                 st.subheader("🏅 Leaderboard")
                 leaderboard = pd.DataFrame([
-                    {"Strategy": k, "Avg Score": v, "Emoji": AGENT_DESCRIPTIONS[k][1]}
+                    {"Strategy": k, "Avg Score": v, "Emoji": AGENT_DESCRIPTIONS.get(k, (k, "🤖", ""))[1]}
                     for k, v in sorted(avg_scores.items(), key=lambda x: -x[1])
                 ])
 
