@@ -1,0 +1,183 @@
+run:
+  run_id: "tournament_crewai_vs_policy"
+  seed: 42
+  output_dir: "data/runs/tournament_crewai_vs_policy"
+  store_prompts: false
+  store_raw_responses: false
+
+game:
+  name: "prisoners_dilemma"
+  payoff_matrix:
+    C:
+      C: [3, 3]
+      D: [0, 5]
+    D:
+      C: [5, 0]
+      D: [1, 1]
+
+horizon:
+  type: "fixed"
+  n_rounds: 50
+  stop_prob: 0.02
+
+experiment:
+  replicates: 2
+  conditions:
+    # strategic_cooperator vs all policies
+    - name: "strategist_vs_ALLC"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "strategic_cooperator" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "ALLC" }
+
+    - name: "strategist_vs_ALLD"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "strategic_cooperator" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "ALLD" }
+
+    - name: "strategist_vs_TFT"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "strategic_cooperator" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "TFT" }
+
+    - name: "strategist_vs_GRIM"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "strategic_cooperator" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "GRIM" }
+
+    - name: "strategist_vs_GTFT"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "strategic_cooperator" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "GTFT" }
+
+    - name: "strategist_vs_WSLS"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "strategic_cooperator" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "WSLS" }
+
+    # ruthless_optimizer vs all policies
+    - name: "ruthless_vs_ALLC"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "ruthless_optimizer" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "ALLC" }
+
+    - name: "ruthless_vs_ALLD"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "ruthless_optimizer" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "ALLD" }
+
+    - name: "ruthless_vs_TFT"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "ruthless_optimizer" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "TFT" }
+
+    - name: "ruthless_vs_GRIM"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "ruthless_optimizer" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "GRIM" }
+
+    - name: "ruthless_vs_GTFT"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "ruthless_optimizer" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "GTFT" }
+
+    - name: "ruthless_vs_WSLS"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "ruthless_optimizer" }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "WSLS" }
+
+    # adaptive_diplomat vs all policies
+    - name: "diplomat_vs_ALLC"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "adaptive_diplomat", temperature: 0.7 }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "ALLC" }
+
+    - name: "diplomat_vs_ALLD"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "adaptive_diplomat", temperature: 0.7 }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "ALLD" }
+
+    - name: "diplomat_vs_TFT"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "adaptive_diplomat", temperature: 0.7 }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "TFT" }
+
+    - name: "diplomat_vs_GRIM"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "adaptive_diplomat", temperature: 0.7 }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "GRIM" }
+
+    - name: "diplomat_vs_GTFT"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "adaptive_diplomat", temperature: 0.7 }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "GTFT" }
+
+    - name: "diplomat_vs_WSLS"
+      agent_a:
+        ref: "agents/crewai_base.yaml"
+        overrides: { agent_key: "adaptive_diplomat", temperature: 0.7 }
+      agent_b:
+        ref: "agents/policies.yaml"
+        overrides: { policy: "WSLS" }
+
+metrics:
+  collapse:
+    k: 10
+    cooperation_threshold: 0.2
+  report:
+    - cooperation_rate
+    - cooperation_rate_over_time
+    - retaliation_rate
+    - forgiveness_rate
+    - exploitability_payoff_gap
+    - time_to_collapse
