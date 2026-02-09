@@ -100,7 +100,7 @@ Added to the Streamlit Tournament tab:
 ## Action Items for Next Session
 
 ### Urgent
-- **Rotate OpenAI API key** — the key was accidentally exposed in chat. Generate a new one at https://platform.openai.com/api-keys and update `.env`.
+- ~~**Rotate OpenAI API key**~~ — DONE (2026-02-08). Old keys revoked, new key generated and set in `.env`.
 
 ### TODO from code
 - **Implement LiteLLM provider** — `# TODO` in `src/pdbench/agents/providers/openai.py`. Would allow Anthropic, Cohere, etc. via one adapter.
