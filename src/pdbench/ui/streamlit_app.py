@@ -666,9 +666,126 @@ def render_replay_tab() -> None:
 # Tab: Tournament (Multi-strategy comparison)
 # =============================================================================
 
+def render_tournament_results(aggregates: pd.DataFrame) -> None:
+    """Render tournament leaderboard and matchup breakdown from aggregates."""
+    # Average across replicates per condition
+    avg = aggregates.groupby("condition").agg({
+        "agent_a_cooperation_rate": "mean",
+        "agent_b_cooperation_rate": "mean",
+        "agent_a_total_payoff": "mean",
+        "agent_b_total_payoff": "mean",
+        "overall_cooperation_rate": "mean",
+        "time_to_collapse": "mean",
+    }).round(2)
+
+    # Extract unique agent names from conditions
+    agent_a_names = set()
+    agent_b_names = set()
+    matchup_data = []
+    for cond, row in avg.iterrows():
+        parts = cond.split("_vs_")
+        if len(parts) == 2:
+            a_name, b_name = parts
+            agent_a_names.add(a_name)
+            agent_b_names.add(b_name)
+            matchup_data.append({
+                "Agent A": a_name,
+                "Agent B": b_name,
+                "A Coop Rate": row["agent_a_cooperation_rate"],
+                "B Coop Rate": row["agent_b_cooperation_rate"],
+                "A Payoff": row["agent_a_total_payoff"],
+                "B Payoff": row["agent_b_total_payoff"],
+                "Overall Coop": row["overall_cooperation_rate"],
+                "Collapse": int(row["time_to_collapse"]) if pd.notna(row["time_to_collapse"]) else None,
+            })
+
+    # Leaderboard: total payoff per agent_a across all opponents
+    st.subheader("🏅 Leaderboard")
+    scores: dict[str, list[float]] = {}
+    for m in matchup_data:
+        scores.setdefault(m["Agent A"], []).append(m["A Payoff"])
+
+    leaderboard_rows = []
+    for agent, payoffs in sorted(scores.items(), key=lambda x: -sum(x[1]) / len(x[1])):
+        desc = AGENT_DESCRIPTIONS.get(agent, (agent, "🤖", ""))
+        leaderboard_rows.append({
+            "Agent": agent,
+            "Emoji": desc[1],
+            "Full Name": desc[0],
+            "Avg Payoff": sum(payoffs) / len(payoffs),
+            "Total Payoff": sum(payoffs),
+            "Matches": len(payoffs),
+        })
+
+    for i, row in enumerate(leaderboard_rows):
+        medal = ["🥇", "🥈", "🥉"][i] if i < 3 else f"{i+1}."
+        st.markdown(
+            f"{medal} {row['Emoji']} **{row['Full Name']}** (`{row['Agent']}`) — "
+            f"**{row['Avg Payoff']:.1f}** avg payoff across {row['Matches']} opponents "
+            f"({row['Total Payoff']:.0f} total)"
+        )
+
+    st.divider()
+
+    # Matchup detail table
+    st.subheader("📊 Matchup Breakdown")
+    matchup_df = pd.DataFrame(matchup_data)
+    matchup_df["Collapse"] = matchup_df["Collapse"].apply(lambda x: "Never" if x is None else str(int(x)))
+    matchup_df["A Coop Rate"] = matchup_df["A Coop Rate"].apply(lambda x: f"{x:.0%}")
+    matchup_df["B Coop Rate"] = matchup_df["B Coop Rate"].apply(lambda x: f"{x:.0%}")
+    matchup_df["Overall Coop"] = matchup_df["Overall Coop"].apply(lambda x: f"{x:.0%}")
+    matchup_df["A Payoff"] = matchup_df["A Payoff"].apply(lambda x: f"{x:.0f}")
+    matchup_df["B Payoff"] = matchup_df["B Payoff"].apply(lambda x: f"{x:.0f}")
+    st.dataframe(matchup_df, use_container_width=True, hide_index=True)
+
+    # Payoff heatmap as a pivot table
+    if len(agent_a_names) > 1 or len(agent_b_names) > 1:
+        st.subheader("🗺️ Payoff Matrix (Agent A payoff)")
+        raw_matchup_df = pd.DataFrame(matchup_data)
+        pivot = raw_matchup_df.pivot_table(
+            index="Agent A", columns="Agent B", values="A Payoff", aggfunc="mean"
+        ).round(0)
+        st.dataframe(pivot.style.background_gradient(cmap="RdYlGn", axis=None), use_container_width=True)
+
+        st.subheader("🤝 Cooperation Heatmap (Agent A coop rate)")
+        coop_pivot = raw_matchup_df.pivot_table(
+            index="Agent A", columns="Agent B", values="A Coop Rate", aggfunc="mean"
+        ).round(2)
+        st.dataframe(
+            coop_pivot.style.background_gradient(cmap="RdYlGn", axis=None, vmin=0, vmax=1)
+                .format("{:.0%}"),
+            use_container_width=True,
+        )
+
+
 def render_tournament_tab() -> None:
     """Render tournament mode - all strategies compete against each other."""
     st.header("🏆 Tournament Mode")
+
+    # View saved tournament results
+    tournament_runs = [
+        d for d in get_available_runs()
+        if d.name.startswith("tournament")
+    ]
+
+    if tournament_runs:
+        st.subheader("📂 Saved Tournament Results")
+        selected_run = st.selectbox(
+            "Select a tournament run",
+            tournament_runs,
+            format_func=lambda x: x.name,
+            key="tournament_saved_run",
+        )
+        if selected_run:
+            try:
+                _, _, aggregates = load_run_data(selected_run)
+                render_tournament_results(aggregates)
+            except Exception as e:
+                st.error(f"Failed to load tournament: {e}")
+
+        st.divider()
+
+    st.subheader("🚀 Run New Tournament")
     st.info("Run a round-robin tournament where all strategies play against each other.")
 
     # Strategy selection
