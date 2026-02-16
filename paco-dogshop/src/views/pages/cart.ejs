@@ -1,0 +1,59 @@
+<%- include('../partials/header') %>
+
+<section class="page-header">
+  <div class="container">
+    <h1>Shopping Cart</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <% if (cart.items.length === 0) { %>
+      <div class="empty-state">
+        <p>Your cart is empty.</p>
+        <a href="/shop" class="btn btn-primary">Continue Shopping</a>
+      </div>
+    <% } else { %>
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cart.items.forEach(item => { %>
+            <tr>
+              <td><%= item.name %></td>
+              <td>$<%= item.price.toFixed(2) %></td>
+              <td><%= item.quantity %></td>
+              <td>$<%= (item.price * item.quantity).toFixed(2) %></td>
+              <td>
+                <form action="/cart/remove" method="POST" style="display:inline">
+                  <input type="hidden" name="productId" value="<%= item.productId %>">
+                  <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3"><strong>Total</strong></td>
+            <td><strong>$<%= cart.total.toFixed(2) %></strong></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="cart-actions">
+        <a href="/shop" class="btn btn-outline">Continue Shopping</a>
+        <a href="/cart/checkout" class="btn btn-primary">Proceed to Checkout</a>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

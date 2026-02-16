@@ -1,0 +1,35 @@
+<%- include('../partials/header') %>
+
+<section class="section">
+  <div class="container">
+    <% if (!product) { %>
+      <div class="empty-state">
+        <p>Product not found.</p>
+        <a href="/shop" class="btn btn-primary">Back to Shop</a>
+      </div>
+    <% } else { %>
+      <div class="product-detail">
+        <div class="product-detail-image">
+          <img src="<%= product.image || '/images/placeholder.png' %>" alt="<%= product.name %>">
+        </div>
+        <div class="product-detail-info">
+          <h1><%= product.name %></h1>
+          <p class="product-price">$<%= product.price.toFixed(2) %></p>
+          <p class="product-description"><%= product.description %></p>
+          <form action="/cart/add" method="POST">
+            <input type="hidden" name="productId" value="<%= product.id %>">
+            <input type="hidden" name="name" value="<%= product.name %>">
+            <input type="hidden" name="price" value="<%= product.price %>">
+            <div class="form-group">
+              <label for="quantity">Quantity</label>
+              <input type="number" id="quantity" name="quantity" value="1" min="1" max="10">
+            </div>
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+          </form>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

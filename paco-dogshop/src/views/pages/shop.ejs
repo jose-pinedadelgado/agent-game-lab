@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+
+<section class="page-header">
+  <div class="container">
+    <h1><%= typeof currentCategory !== 'undefined' && currentCategory ? currentCategory.name : 'All Products' %></h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container shop-layout">
+    <aside class="shop-sidebar">
+      <h3>Categories</h3>
+      <ul class="category-list">
+        <li><a href="/shop" class="<%= typeof currentCategory === 'undefined' || !currentCategory ? 'active' : '' %>">All Products</a></li>
+        <% categories.forEach(cat => { %>
+          <li>
+            <a href="/shop/category/<%= cat.slug %>"
+               class="<%= typeof currentCategory !== 'undefined' && currentCategory && currentCategory.slug === cat.slug ? 'active' : '' %>">
+              <%= cat.name %>
+            </a>
+          </li>
+        <% }) %>
+      </ul>
+    </aside>
+
+    <div class="products-grid">
+      <% if (products.length === 0) { %>
+        <div class="empty-state">
+          <p>Products coming soon! Check back for our curated selection of dog accessories.</p>
+        </div>
+      <% } else { %>
+        <% products.forEach(product => { %>
+          <div class="product-card">
+            <a href="/shop/product/<%= product.id %>">
+              <div class="product-image">
+                <img src="<%= product.image || '/images/placeholder.png' %>" alt="<%= product.name %>">
+              </div>
+              <div class="product-info">
+                <h3><%= product.name %></h3>
+                <p class="product-price">$<%= product.price.toFixed(2) %></p>
+              </div>
+            </a>
+            <form action="/cart/add" method="POST">
+              <input type="hidden" name="productId" value="<%= product.id %>">
+              <input type="hidden" name="name" value="<%= product.name %>">
+              <input type="hidden" name="price" value="<%= product.price %>">
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+            </form>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

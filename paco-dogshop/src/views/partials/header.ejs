@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">
+        <span class="logo-icon">🐾</span> Paco Dog Shop
+      </a>
+      <ul class="nav-links">
+        <li><a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Home</a></li>
+        <li><a href="/shop" class="<%= currentPath.startsWith('/shop') ? 'active' : '' %>">Shop</a></li>
+        <li><a href="/training" class="<%= currentPath.startsWith('/training') ? 'active' : '' %>">Training</a></li>
+        <li><a href="/about" class="<%= currentPath === '/about' ? 'active' : '' %>">About</a></li>
+        <li><a href="/contact" class="<%= currentPath === '/contact' ? 'active' : '' %>">Contact</a></li>
+        <li>
+          <a href="/cart" class="cart-link">
+            Cart (<%= cart.items.length %>)
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <main>

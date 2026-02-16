@@ -1,0 +1,47 @@
+[
+  {
+    "id": "puppy-basics",
+    "name": "Puppy Basics",
+    "description": "Foundation training for puppies 8 weeks to 6 months. Socialization, basic commands, and house training.",
+    "price": 199,
+    "duration": "6-week course",
+    "schedule": "Saturday mornings, 10am",
+    "maxParticipants": 6
+  },
+  {
+    "id": "basic-obedience",
+    "name": "Basic Obedience",
+    "description": "Comprehensive obedience covering heel, stay, reliable recall, leash manners, and impulse control.",
+    "price": 249,
+    "duration": "8-week course",
+    "schedule": "Tuesday & Thursday evenings, 6pm",
+    "maxParticipants": 8
+  },
+  {
+    "id": "advanced-obedience",
+    "name": "Advanced Obedience",
+    "description": "Off-leash reliability, distance commands, distraction proofing, and CGC test preparation.",
+    "price": 299,
+    "duration": "8-week course",
+    "schedule": "Wednesday evenings, 6pm",
+    "maxParticipants": 8
+  },
+  {
+    "id": "private",
+    "name": "Private Training Sessions",
+    "description": "One-on-one training tailored to your dog's specific needs. Behavioral issues, reactivity, or personalized goals.",
+    "price": 85,
+    "duration": "60 minutes per session",
+    "schedule": "Flexible scheduling",
+    "maxParticipants": 1
+  },
+  {
+    "id": "board-train",
+    "name": "Board & Train",
+    "description": "Intensive immersive training where your dog stays with us. Daily sessions with progress updates.",
+    "price": 1200,
+    "duration": "2-week or 4-week programs",
+    "schedule": "Ongoing enrollment",
+    "maxParticipants": 4
+  }
+]

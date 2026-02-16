@@ -1,0 +1,9 @@
+node_modules/
+.env
+*.sqlite3
+data/*.sqlite3
+public/css/output.css
+coverage/
+dist/
+.DS_Store
+*.log

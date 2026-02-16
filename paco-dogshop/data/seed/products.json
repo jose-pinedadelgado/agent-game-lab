@@ -1,0 +1,122 @@
+[
+  {
+    "id": "collar-001",
+    "name": "Classic Leather Collar",
+    "category": "collars",
+    "price": 29.99,
+    "description": "Handcrafted genuine leather collar with brass buckle. Available in brown and black.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "collar-002",
+    "name": "Adjustable Harness",
+    "category": "collars",
+    "price": 34.99,
+    "description": "No-pull adjustable harness with padded chest plate. Reduces pulling and is gentle on joints.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "leash-001",
+    "name": "Nylon Training Leash - 6ft",
+    "category": "leashes",
+    "price": 18.99,
+    "description": "Durable 6-foot nylon leash with padded handle. Perfect for daily walks and training sessions.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "leash-002",
+    "name": "Retractable Leash - 16ft",
+    "category": "leashes",
+    "price": 24.99,
+    "description": "Retractable leash with one-button brake and lock. Gives your dog freedom while maintaining control.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "toy-001",
+    "name": "Durable Chew Ball",
+    "category": "toys",
+    "price": 12.99,
+    "description": "Virtually indestructible rubber ball for aggressive chewers. Bounces and floats.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "toy-002",
+    "name": "Puzzle Feeder Toy",
+    "category": "toys",
+    "price": 19.99,
+    "description": "Interactive puzzle toy that dispenses treats. Keeps dogs mentally stimulated and entertained.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "toy-003",
+    "name": "Rope Tug Toy",
+    "category": "toys",
+    "price": 9.99,
+    "description": "Heavy-duty braided rope for tug-of-war. Also helps clean teeth during play.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "groom-001",
+    "name": "Slicker Brush",
+    "category": "grooming",
+    "price": 14.99,
+    "description": "Professional-grade slicker brush for removing mats and loose fur. Works on all coat types.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "groom-002",
+    "name": "Natural Oatmeal Shampoo",
+    "category": "grooming",
+    "price": 11.99,
+    "description": "Gentle oatmeal shampoo for sensitive skin. Soap-free, paraben-free, and pH balanced.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "apparel-001",
+    "name": "Waterproof Dog Jacket",
+    "category": "apparel",
+    "price": 39.99,
+    "description": "Lightweight waterproof jacket with reflective strips. Keeps your dog dry and visible at night.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "bowl-001",
+    "name": "Stainless Steel Bowl Set",
+    "category": "bowls",
+    "price": 22.99,
+    "description": "Set of 2 non-slip stainless steel bowls. Dishwasher safe and rust-resistant.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "bowl-002",
+    "name": "Slow Feeder Bowl",
+    "category": "bowls",
+    "price": 16.99,
+    "description": "Maze-pattern slow feeder to prevent bloat and improve digestion. BPA-free.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "bed-001",
+    "name": "Orthopedic Dog Bed - Large",
+    "category": "beds",
+    "price": 69.99,
+    "description": "Memory foam orthopedic bed for large breeds. Removable, machine-washable cover.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "treat-001",
+    "name": "Training Treats - Chicken",
+    "category": "treats",
+    "price": 8.99,
+    "description": "Small, soft training treats made with real chicken. Low calorie, perfect for repetitive training.",
+    "image": "/images/placeholder.png"
+  },
+  {
+    "id": "treat-002",
+    "name": "Bully Sticks - 6 Pack",
+    "category": "treats",
+    "price": 24.99,
+    "description": "All-natural, single-ingredient bully sticks. Long-lasting chew for dental health.",
+    "image": "/images/placeholder.png"
+  }
+]
