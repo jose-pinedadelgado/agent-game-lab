@@ -1,0 +1,94 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Pixel Village</title>
+<style>
+ body{margin:0;background:#1b1f2a;font:12px monospace;color:#eee;overflow:hidden}
+ canvas#c{width:100vw;height:100vh;image-rendering:pixelated;display:block}
+ #ui{position:fixed;top:8px;left:8px;background:#0008;padding:8px;border-radius:4px}
+ #ui button{font:inherit;margin:2px;background:#333;color:#eee;border:1px solid #555;cursor:pointer}
+ #ui button.sel{background:#6a5;color:#000}
+ #side{position:fixed;top:8px;right:8px;background:#0008;padding:8px;width:220px;border-radius:4px}
+ .bar{height:5px;background:#333;margin:1px 0 4px}.bar i{display:block;height:100%;background:#6c5}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="ui"><b>Build</b> (left-click place, right-click remove, drag-wheel to orbit)<br><span id="pal"></span>
+<br>Layer y: <button id="ydn">-</button><span id="y">0</span><button id="yup">+</button></div>
+<div id="side"></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const COLORS={wall:0xd9c3a0,floor:0x9b6b43,roof:0xb0413e,door:0x5a3a1e,tree:0x2f8f3a,path:0xa8a29a,
+  bed:0x4f7fd0,fridge:0xeeeeee,tv:0x222222,sofa:0xa05ab0};
+const H={floor:0.15,path:0.08,bed:0.5,sofa:0.6,tv:0.7};
+const PIX=4; // pixel-art downscale factor
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:false});
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x87b5e0);
+const cam=new THREE.OrthographicCamera(-16,16,10,-10,0.1,200);
+cam.position.set(30,28,30);
+const controls=new OrbitControls(cam,canvas); controls.target.set(12,0,12);
+controls.mouseButtons={LEFT:null,MIDDLE:THREE.MOUSE.ROTATE,RIGHT:null}; controls.update();
+scene.add(new THREE.HemisphereLight(0xffffff,0x445533,1.2));
+const sun=new THREE.DirectionalLight(0xffffff,1.5); sun.position.set(10,30,5); scene.add(sun);
+let size=24;
+const ground=new THREE.Mesh(new THREE.BoxGeometry(size,1,size),new THREE.MeshLambertMaterial({color:0x5fae4a}));
+ground.position.set(size/2-0.5,-0.5,size/2-0.5); scene.add(ground);
+const grid=new THREE.GridHelper(size,size,0x000000,0x000000); grid.material.opacity=0.12; grid.material.transparent=true;
+grid.position.set(size/2-0.5,0.01,size/2-0.5); scene.add(grid);
+function resize(){const w=innerWidth,h=innerHeight;renderer.setPixelRatio(1);renderer.setSize(w/PIX,h/PIX,false);
+  const a=w/h;cam.left=-10*a;cam.right=10*a;cam.top=10;cam.bottom=-10;cam.updateProjectionMatrix();}
+addEventListener('resize',resize); resize();
+
+const blockGroup=new THREE.Group(); scene.add(blockGroup);
+const vilGroup=new THREE.Group(); scene.add(vilGroup);
+const mats={}; const mat=c=>mats[c]??=new THREE.MeshLambertMaterial({color:c});
+function blockMesh(b){
+  const g=new THREE.Group();
+  if(b.kind==='tree'){
+    const t=new THREE.Mesh(new THREE.BoxGeometry(.3,1,.3),mat(0x6b4423));t.position.y=.5;g.add(t);
+    const l=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),mat(COLORS.tree));l.position.y=1.4;g.add(l);
+  }else{const h=H[b.kind]??1;const m=new THREE.Mesh(new THREE.BoxGeometry(b.kind==='floor'||b.kind==='path'?1:.85,h,.85+(b.kind==='floor'||b.kind==='path'?.15:0)),mat(COLORS[b.kind]??0xff00ff));
+    m.position.y=h/2;g.add(m);}
+  g.position.set(b.x,b.y,b.z); g.userData=b; return g;
+}
+function villagerMesh(v,i){
+  const g=new THREE.Group(); const c=[0xe07a5f,0x3d85c6][i%2];
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.5,.7,.35),mat(c));body.position.y=.55;g.add(body);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.4,.4,.4),mat(0xf2c9a0));head.position.y=1.1;g.add(head);
+  const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.15),mat(0x66ff66));gem.position.y=1.6;g.add(gem);g.userData.gem=gem;
+  return g;
+}
+let sel='wall',layer=0,last='';
+const pal=document.getElementById('pal');
+async function load(){
+  const s=await (await fetch('/state')).json();
+  if(!pal.childElementCount) s.kinds.forEach(k=>{const b=document.createElement('button');b.textContent=k;
+    b.onclick=()=>{sel=k;[...pal.children].forEach(x=>x.classList.toggle('sel',x===b))};if(k===sel)b.classList.add('sel');pal.append(b)});
+  const sig=JSON.stringify(s.blocks);
+  if(sig!==last){last=sig;blockGroup.clear();s.blocks.forEach(b=>blockGroup.add(blockMesh(b)));}
+  while(vilGroup.children.length<s.villagers.length) vilGroup.add(villagerMesh(s.villagers[vilGroup.children.length],vilGroup.children.length));
+  s.villagers.forEach((v,i)=>{const m=vilGroup.children[i];m.userData.tx=v.x;m.userData.tz=v.z;
+    const worst=Math.min(...Object.values(v.needs));m.userData.gem.material=mat(worst>50?0x66ff66:worst>25?0xffcc33:0xff3333);});
+  document.getElementById('side').innerHTML=`<b>Tick ${s.tick}</b>`+s.villagers.map(v=>`<hr><b>${v.name}</b> — ${v.activity}`+
+    Object.entries(v.needs).map(([n,x])=>`<div>${n}</div><div class=bar><i style="width:${x}%"></i></div>`).join('')).join('')+
+    '<hr><b>Events</b><br>'+s.events.slice(-5).reverse().map(e=>`${e.tick}: ${e.type} ${e.kind??e.villager??''}`).join('<br>');
+}
+setInterval(load,500); load();
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+async function act(a){const r=await fetch('/action',{method:'POST',body:JSON.stringify(a)});last='';load();return r.json();}
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+canvas.addEventListener('pointerdown',e=>{
+  if(e.button===1)return;
+  mouse.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1); ray.setFromCamera(mouse,cam);
+  plane.constant=-layer; const p=new THREE.Vector3(); if(!ray.ray.intersectPlane(plane,p))return;
+  const x=Math.round(p.x),z=Math.round(p.z);
+  act(e.button===2?{type:'remove',x,y:layer,z}:{type:'build',x,y:layer,z,kind:sel});
+});
+const setY=d=>{layer=Math.max(0,Math.min(3,layer+d));document.getElementById('y').textContent=layer};
+document.getElementById('yup').onclick=()=>setY(1);document.getElementById('ydn').onclick=()=>setY(-1);
+(function loop(t){requestAnimationFrame(loop);
+  vilGroup.children.forEach(m=>{if(m.userData.tx===undefined)return;m.position.x+=(m.userData.tx-m.position.x)*.1;
+    m.position.z+=(m.userData.tz-m.position.z)*.1;m.position.y=Math.abs(Math.sin(t/150))*.08;m.userData.gem.rotation.y=t/400;});
+  renderer.render(scene,cam);})();
+</script></body></html>
